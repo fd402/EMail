@@ -12,7 +12,7 @@ interface PricingModalProps {
 }
 
 export const PricingModal = ({ isOpen, onClose, currentPlan = 'free' }: PricingModalProps) => {
-    const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
+    const billingPeriod = 'monthly';
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
     const handleUpgrade = async (plan: 'pro' | 'agency') => {
@@ -62,38 +62,13 @@ export const PricingModal = ({ isOpen, onClose, currentPlan = 'free' }: PricingM
                         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none" />
                         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-pink-50 rounded-full blur-3xl opacity-50 pointer-events-none" />
 
-                        <div className="text-center mb-8 relative z-10">
+                        <div className="text-center mb-12 relative z-10">
                             <Dialog.Title className="text-4xl font-black text-slate-900 mb-2 tracking-tight">
                                 Unlock Your Full Potential
                             </Dialog.Title>
-                            <p className="text-sm text-slate-500 max-w-lg mx-auto font-medium mb-6">
+                            <p className="text-sm text-slate-500 max-w-lg mx-auto font-medium">
                                 Choose the plan that fits your needs. Upgrade anytime to access premium features.
                             </p>
-
-                            {/* Billing Toggle */}
-                            <div className="inline-flex items-center gap-3 bg-slate-100 p-1 rounded-xl">
-                                <button
-                                    onClick={() => setBillingPeriod('monthly')}
-                                    className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${billingPeriod === 'monthly'
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
-                                        }`}
-                                >
-                                    Monthly
-                                </button>
-                                <button
-                                    onClick={() => setBillingPeriod('yearly')}
-                                    className={`px-6 py-2 rounded-lg font-bold text-sm transition-all relative ${billingPeriod === 'yearly'
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
-                                        }`}
-                                >
-                                    Yearly
-                                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                                        SAVE 17%
-                                    </span>
-                                </button>
-                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">

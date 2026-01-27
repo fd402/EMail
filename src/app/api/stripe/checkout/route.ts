@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         // Get or create Stripe customer
         const { data: profile } = await supabase
             .from('profiles')
-            .select('stripe_customer_id, subscription_plan')
+            .select('stripe_customer_id, subscription_plan, subscription_status')
             .eq('id', user.id)
             .single();
 
@@ -72,10 +72,20 @@ export async function POST(req: NextRequest) {
             console.log('[Checkout] Found existing Customer:', customerId);
         }
 
+        console.log('[Checkout] DEBUG PROFILE:', {
+            plan: profile?.subscription_plan,
+            status: profile?.subscription_status
+        });
+
         // PREVENT DOUBLE SUBSCRIPTIONS:
-        // If user already has a paid plan (not 'free'), send them to Customer Portal to upgrade/change plan
-        if (profile?.subscription_plan && profile.subscription_plan !== 'free') {
-            console.log('[Checkout] User has existing paid plan:', profile.subscription_plan);
+        // User explicitly requested to ALWAYS go to checkout.
+        // Commenting out Portal redirection.
+        /*
+        const isActive = profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing';
+        const isPaidPlan = profile?.subscription_plan && profile.subscription_plan !== 'free';
+
+        if (isPaidPlan && isActive) {
+            console.log('[Checkout] User has existing ACTIVE paid plan:', profile.subscription_plan);
             console.log('[Checkout] Redirecting to Customer Portal for upgrade/management...');
 
             const portalSession = await stripe.billingPortal.sessions.create({
@@ -85,6 +95,7 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({ url: portalSession.url });
         }
+        */
 
         // Get the price ID for the selected plan and period
         const priceId = getPriceId(plan, period);

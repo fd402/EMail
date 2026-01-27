@@ -291,7 +291,7 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
             <ProfileSettings isOpen={showSettings} onClose={() => setShowSettings(false)} user={user} />
             <MagicGeneratorModal isOpen={isMagicOpen} onClose={() => setIsMagicOpen(false)} />
-            <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+            <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} currentPlan={subscription as 'free' | 'pro' | 'agency'} />
         </header>
     );
 };

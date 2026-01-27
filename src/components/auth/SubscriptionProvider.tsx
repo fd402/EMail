@@ -13,7 +13,13 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const router = useRouter();
 
     useEffect(() => {
-        const supabase = createClient();
+        let supabase: any;
+        try {
+            supabase = createClient();
+        } catch (e) {
+            console.warn('[SubProvider] Not initializing Supabase client (missing keys?)');
+            return;
+        }
         const sessionId = searchParams.get('session_id');
 
         async function syncSubscription() {
@@ -69,8 +75,48 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
             }
         });
 
-        return () => authSub.unsubscribe();
+        return () => {
+            authSub.unsubscribe();
+        };
     }, [searchParams, router, setSubscription]);
+
+    // 4. Realtime Listener for Profile Changes (Instant Updates)
+    useEffect(() => {
+        let supabase: any;
+        try { supabase = createClient(); } catch { return; }
+
+        let channel: any;
+
+        const setupRealtime = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            channel = supabase
+                .channel('schema-db-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'profiles',
+                        filter: `id=eq.${user.id}`,
+                    },
+                    (payload: any) => {
+                        console.log('[SubProvider] Realtime Update:', payload);
+                        if (payload.new?.subscription_plan) {
+                            setSubscription(payload.new.subscription_plan as SubscriptionPlan);
+                        }
+                    }
+                )
+                .subscribe();
+        };
+
+        setupRealtime();
+
+        return () => {
+            if (channel) supabase.removeChannel(channel);
+        };
+    }, [setSubscription]);
 
     return <>{children}</>;
 }
