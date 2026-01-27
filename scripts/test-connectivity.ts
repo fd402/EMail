@@ -6,7 +6,7 @@ const STRIPE_SECRET_KEY = 'sk_test_51SpZPXACe2Va9qy32Hlo75pGWbz2YndBs7EggpulrFeN
 const PRICE_ID = 'price_1StCX6ACe2Va9qy3flfwE5SQ'; // Pro Monthly
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-    apiVersion: '2024-12-18.acacia',
+    apiVersion: '2025-12-15.clover',
     typescript: true,
 });
 
