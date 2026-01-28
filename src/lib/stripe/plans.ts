@@ -39,8 +39,8 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
     pro: {
         name: 'Pro',
         price: {
-            monthly: 25,
-            yearly: 250, // Save 2 months
+            monthly: 19,
+            yearly: 190, // Save 2 months
         },
         features: [
             'Unlimited Project Saves',

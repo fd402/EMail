@@ -44,7 +44,7 @@ export const PLANS: Record<SubscriptionPlan, PlanDetails> = {
     pro: {
         id: 'pro',
         name: 'Pro',
-        price: '25 €',
+        price: '19 €',
         description: 'For growing creators',
         features: [
             'Unlimited Project Saves',
