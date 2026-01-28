@@ -24,9 +24,9 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
             yearly: 0,
         },
         features: [
-            'Unlimited templates',
-            'Basic blocks',
-            'Export to HTML',
+            '3 Project Saves',
+            '3 Basic Templates',
+            'Basic Email Blocks',
             'Community support',
         ],
         limits: {
@@ -39,15 +39,15 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
     pro: {
         name: 'Pro',
         price: {
-            monthly: 19,
-            yearly: 190, // Save 2 months
+            monthly: 25,
+            yearly: 250, // Save 2 months
         },
         features: [
+            'Unlimited Project Saves',
+            'All 20+ Premium Templates',
             'Everything in Free',
             'AI Magic Generator (unlimited)',
             'Remove branding',
-            'Priority support',
-            'Advanced blocks',
         ],
         limits: {
             aiGenerations: 'unlimited',
@@ -59,20 +59,17 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
     agency: {
         name: 'Agency',
         price: {
-            monthly: 49,
-            yearly: 490, // Save 2 months
+            monthly: 99,
+            yearly: 990,
         },
         features: [
             'Everything in Pro',
-            'Team collaboration (5 seats)',
-            'Custom branding',
-            'API access',
-            'White-label option',
-            'Dedicated support',
+            'Unlimited Team Members',
+            'Custom Domain',
         ],
         limits: {
             aiGenerations: 'unlimited',
-            teamMembers: 5,
+            teamMembers: 10,
             templates: 'unlimited',
             removeBranding: true,
         },
@@ -83,11 +80,9 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
 export const STRIPE_PRICE_IDS = {
     pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
     pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || '',
-    agency_monthly: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID || '',
-    agency_yearly: process.env.STRIPE_AGENCY_YEARLY_PRICE_ID || '',
 };
 
-export function getPriceId(plan: 'pro' | 'agency', period: BillingPeriod): string {
+export function getPriceId(plan: 'pro', period: BillingPeriod): string {
     const key = `${plan}_${period}` as keyof typeof STRIPE_PRICE_IDS;
     return STRIPE_PRICE_IDS[key];
 }

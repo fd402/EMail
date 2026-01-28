@@ -8,6 +8,7 @@ export interface EmailTemplate {
     thumbnail: string;
     backgroundColor?: string;
     blocks: Block[];
+    isFree?: boolean;
 }
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = [
@@ -17,6 +18,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
         description: 'Onboard new users with a warm welcome',
         category: 'Onboarding',
         thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80',
+        isFree: true,
         blocks: [
             {
                 id: 'welcome-text-1',
@@ -86,6 +88,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
         description: 'Engage your audience with news and updates',
         category: 'Marketing',
         thumbnail: 'https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?auto=format&fit=crop&w=400&q=80',
+        isFree: true,
         blocks: [
             {
                 id: 'newsletter-text-1',
@@ -277,7 +280,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
                 id: 'event-block-1',
                 type: 'event',
                 content: {
-                    title: 'Tech Summit 2024',
+                    title: 'Tech Summit 2026',
                     day: '15',
                     month: 'MAR',
                     time: '14:00 - 18:00',
@@ -434,6 +437,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
         description: 'Clean transactional email with receipt table',
         category: 'Transactional',
         thumbnail: '',
+        isFree: true,
         blocks: [
             { id: 'oc-icon', type: 'text', content: { text: '✅' }, styles: { padding: '40px 0 10px', textAlign: 'center', fontSize: '48px' } },
             { id: 'oc-title', type: 'text', content: { text: 'Order Confirmed!' }, styles: { padding: '0 40px 5px', textAlign: 'center', fontSize: '28px', color: '#111', fontWeight: '700' } },

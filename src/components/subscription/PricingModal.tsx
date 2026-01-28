@@ -15,7 +15,7 @@ export const PricingModal = ({ isOpen, onClose, currentPlan = 'free' }: PricingM
     const billingPeriod = 'monthly';
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-    const handleUpgrade = async (plan: 'pro' | 'agency') => {
+    const handleUpgrade = async (plan: 'pro') => {
         setLoadingPlan(plan);
 
         try {
@@ -71,7 +71,7 @@ export const PricingModal = ({ isOpen, onClose, currentPlan = 'free' }: PricingM
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto relative z-10">
                             {/* Free Plan */}
                             <PlanCard
                                 plan="free"
@@ -95,16 +95,7 @@ export const PricingModal = ({ isOpen, onClose, currentPlan = 'free' }: PricingM
                                 isLoading={loadingPlan === 'pro'}
                             />
 
-                            {/* Agency Plan */}
-                            <PlanCard
-                                plan="agency"
-                                planConfig={PLANS.agency}
-                                currentPlan={currentPlan}
-                                billingPeriod={billingPeriod}
-                                icon={<Building2 className="w-6 h-6 text-purple-500" />}
-                                onSelect={() => handleUpgrade('agency')}
-                                isLoading={loadingPlan === 'agency'}
-                            />
+
                         </div>
 
                         <div className="mt-10 text-center relative z-10">

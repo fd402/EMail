@@ -36,13 +36,10 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                        <Link href="/editor" className="group h-14 px-8 bg-slate-900 text-white rounded-full font-bold text-lg flex items-center gap-3 shadow-xl hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0">
+                        <a href="#pricing" className="group h-14 px-8 bg-slate-900 text-white rounded-full font-bold text-lg flex items-center gap-3 shadow-xl hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0">
                             Start Building Now
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                        <button className="h-14 px-8 bg-white text-slate-700 border border-slate-200/60 rounded-full font-bold text-lg hover:bg-slate-50 transition-all shadow-sm">
-                            View Templates
-                        </button>
+                        </a>
                     </div>
 
                 </div>
@@ -101,7 +98,9 @@ export default function LandingPage() {
             <LandingTestimonials />
 
             {/* Pricing Section */}
-            <LandingPricing />
+            <div id="pricing">
+                <LandingPricing />
+            </div>
 
             {/* FAQ Section */}
             <LandingFAQ />

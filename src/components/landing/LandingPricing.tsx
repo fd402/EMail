@@ -13,7 +13,7 @@ export const LandingPricing = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                     {/* Free Plan */}
                     <PricingCard
                         plan={PLANS.free}
@@ -31,13 +31,7 @@ export const LandingPricing = () => {
                         href="/editor"
                     />
 
-                    {/* Agency Plan */}
-                    <PricingCard
-                        plan={PLANS.agency}
-                        icon={<Building2 className="w-6 h-6 text-purple-500" />}
-                        buttonValue="Contact Sales"
-                        href="/editor"
-                    />
+
                 </div>
             </div>
         </section>

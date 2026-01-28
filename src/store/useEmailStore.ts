@@ -25,6 +25,9 @@ interface StateSnapshot {
 interface EmailStore {
     blocks: Block[];
     selectedBlockId: string | null;
+    projectId: string | null;
+    projectName: string;
+    isDirty: boolean;
 
     // Undo/Redo history
     past: StateSnapshot[];
@@ -36,6 +39,10 @@ interface EmailStore {
     selectBlock: (id: string | null) => void;
     moveBlock: (fromIndex: number, toIndex: number) => void;
     setBlocks: (blocks: Block[]) => void;
+    setProjectInfo: (id: string | null, name: string) => void;
+    loadProject: (project: any) => void;
+    resetProject: () => void;
+    setDirty: (dirty: boolean) => void;
 
     settings: {
         backgroundColor: string;
@@ -59,6 +66,8 @@ interface EmailStore {
     // Subscription
     subscription: SubscriptionPlan;
     setSubscription: (plan: SubscriptionPlan) => void;
+    exportCount: number;
+    setUsage: (count: number) => void;
     checkBlockAccess: (type: BlockType) => boolean;
 }
 
@@ -130,6 +139,7 @@ const recordHistory = (set: any) => (mutator: (state: EmailStore) => Partial<Ema
 
         return {
             ...updates,
+            isDirty: true,
             past: [...state.past.slice(-MAX_HISTORY + 1), snapshot],
             future: [], // Clear future on new action
         };
@@ -204,6 +214,9 @@ const THEMES: Record<ThemeName, Theme> = {
 export const useEmailStore = create<EmailStore>((set, get) => ({
     blocks: INITIAL_BLOCKS,
     selectedBlockId: null,
+    projectId: null,
+    projectName: 'Untitled Project',
+    isDirty: false,
     past: [],
     future: [],
     settings: {
@@ -275,12 +288,50 @@ export const useEmailStore = create<EmailStore>((set, get) => ({
 
     setBlocks: (blocks) => recordHistory(set)(() => ({ blocks })),
 
+    setProjectInfo: (id, name) => set((state) => ({
+        projectId: id,
+        projectName: name,
+        isDirty: state.projectName !== name || state.projectId !== id ? true : state.isDirty
+    })),
+
+    loadProject: (project) => set({
+        projectId: project.id,
+        projectName: project.name,
+        isDirty: false,
+        blocks: project.content.blocks || [],
+        settings: {
+            ...get().settings,
+            ...(project.content.settings || {})
+        },
+        past: [],
+        future: []
+    }),
+
+    resetProject: () => set({
+        blocks: INITIAL_BLOCKS,
+        projectId: null,
+        projectName: 'Untitled Project',
+        isDirty: false,
+        settings: {
+            backgroundColor: '#ffffff',
+            workbenchColor: '#f8fafc',
+            containerWidth: '600px',
+            preheader: '',
+            activeTheme: 'Modern',
+        },
+        past: [],
+        future: []
+    }),
+
+    setDirty: (dirty) => set({ isDirty: dirty }),
+
     updateSettings: (newSettings) => recordHistory(set)((state) => ({
         settings: { ...state.settings, ...newSettings }
     })),
 
     loadTemplate: (blocks, settings) => recordHistory(set)((state) => ({
         blocks,
+        isDirty: true,
         settings: {
             ...state.settings,
             backgroundColor: settings?.backgroundColor || '#ffffff'
@@ -329,6 +380,9 @@ export const useEmailStore = create<EmailStore>((set, get) => ({
     subscription: 'free' as SubscriptionPlan, // Default to free
 
     setSubscription: (plan: SubscriptionPlan) => set({ subscription: plan }),
+
+    exportCount: 0,
+    setUsage: (count: number) => set({ exportCount: count }),
 
     checkBlockAccess: (type: BlockType): boolean => {
         const { subscription } = get();

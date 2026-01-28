@@ -18,6 +18,7 @@ export const LandingNavbar = () => {
                     <div className="h-6 w-px bg-slate-200/60 mx-1"></div>
 
                     <Link href="/login" className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Sign In</Link>
+
                     <Link href="/register" className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Register</Link>
                     <Link href="/editor" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all hover:scale-105 active:scale-95">
                         Launch Editor

@@ -171,7 +171,7 @@ export const LandingPlayground = () => {
                                             <span>LinkedIn</span>
                                             <span>Instagram</span>
                                         </div>
-                                        <p>© 2024 Plainly Inc.</p>
+                                        <p>© 2026 Plainly Inc.</p>
                                     </div>
 
                                 </div>

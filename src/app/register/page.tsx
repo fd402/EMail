@@ -104,7 +104,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="relative z-10 text-xs font-medium text-indigo-200 flex justify-between">
-                    <div>© 2024 Plainly Inc.</div>
+                    <div>© 2026 Plainly Inc.</div>
                     <div className="space-x-4">
                         <a href="#" className="hover:text-white transition-colors">Privacy</a>
                         <a href="#" className="hover:text-white transition-colors">Terms</a>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Code, Copy, Monitor, Smartphone, LayoutTemplate, ChevronDown, Settings, LogOut, User, Undo2, Redo2, Sparkles, Moon, Sun, MessageSquare, Share2, Download } from 'lucide-react';
+import { Eye, Code, Copy, Smartphone, LayoutTemplate, ChevronDown, Settings, LogOut, User, Undo2, Redo2, Sparkles, Moon, Sun, MessageSquare, Share2, Download, Loader2, Plus } from 'lucide-react';
 import { ProfileSettings } from './ProfileSettings';
 import { useEmailStore } from '@/store/useEmailStore';
 import { renderEmail } from '@/lib/renderEmail';
@@ -11,6 +11,10 @@ import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/app/actions/supabase-auth';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { saveProject, getProjects, deleteProject } from '@/app/actions/projects';
+import { getSubscriptionStatus, incrementMonthlyExport } from '@/app/actions/subscription';
+import { ProjectHistory } from './ProjectHistory';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 
 interface HeaderProps {
     viewMode: 'editor' | 'preview';
@@ -21,7 +25,6 @@ interface HeaderProps {
 }
 
 export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, setIsDarkMode }: HeaderProps) => {
-    const { blocks, settings, undo, redo, canUndo, canRedo, subscription } = useEmailStore();
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const { data: session } = useSession();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -29,6 +32,26 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
     const [showSettings, setShowSettings] = useState(false);
     const [isMagicOpen, setIsMagicOpen] = useState(false);
     const [isPricingOpen, setIsPricingOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+    const {
+        blocks,
+        settings,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        subscription,
+        projectId,
+        projectName,
+        isDirty,
+        setProjectInfo,
+        loadProject,
+        resetProject,
+        setDirty
+    } = useEmailStore();
     const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
     useEffect(() => {
@@ -76,9 +99,28 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
         alert('Raw HTML code copied! (For developers)');
     };
 
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const content = { blocks, settings };
+            const result = await saveProject(projectId, projectName, content);
+            setProjectInfo(result.id, result.name);
+            setDirty(false); // Reset dirty flag
+            alert('Project saved successfully!');
+        } catch (error: any) {
+            console.error('Save error:', error);
+            if (error.message === 'LIMIT_REACHED') {
+                setIsPricingOpen(true);
+            } else {
+                alert('Failed to save project: ' + error.message);
+            }
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleCopyVisual = async () => {
         try {
-            // Pass the current settings (including background color) to the renderer
             const html = await renderEmail(blocks, settings);
             const blobHtml = new Blob([html], { type: 'text/html' });
             const blobText = new Blob([html], { type: 'text/plain' });
@@ -95,83 +137,114 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
         }
     };
 
+    const handleExport = async (type: 'visual' | 'code' | 'file') => {
+        // Increment usage
+        const result = await incrementMonthlyExport();
+        if (result.error === 'LIMIT_REACHED') {
+            setIsPricingOpen(true);
+            return false;
+        }
+
+        if (result.success && result.count !== undefined) {
+            useEmailStore.getState().setUsage(result.count);
+        }
+
+        if (type === 'visual') handleCopyVisual();
+        if (type === 'code') handleCopyHtml();
+        if (type === 'file') {
+            const html = await renderEmail(blocks, settings);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectName || 'plainly-email'}-${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        return true;
+    };
+
     return (
         <header className="h-16 flex items-center justify-between px-8 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-subtle z-50">
             {/* Left: Brand */}
-            <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-200">
-                    P
+            <div className="flex items-center gap-8">
+                <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-200">
+                        P
+                    </div>
+                    <span className="font-black text-slate-900 text-lg leading-none tracking-tight">Plainly</span>
+                </Link>
+
+                <div className="h-8 w-px bg-slate-200"></div>
+
+                {/* Project Name Editor */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            if (isDirty) {
+                                setShowResetConfirm(true);
+                            } else {
+                                resetProject();
+                            }
+                        }}
+                        className="p-2 hover:bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-lg transition-colors group/new"
+                        title="New Design"
+                    >
+                        <Plus size={18} className="group-hover/new:rotate-90 transition-transform duration-300" />
+                    </button>
+
+
+                    <input
+                        type="text"
+                        value={projectName}
+                        onChange={(e) => setProjectInfo(projectId, e.target.value)}
+                        className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-1 focus:ring-indigo-100 rounded-lg px-2 py-1 w-48 truncate"
+                        placeholder="Project Name..."
+                    />
+                    {isSaving && (
+                        <Loader2 size={14} className="text-indigo-500 animate-spin" />
+                    )}
                 </div>
-                <span className="font-black text-slate-900 text-lg leading-none tracking-tight">Plainly</span>
-            </Link>
+            </div>
 
 
             {/* Right: Actions */}
             <div className="flex items-center gap-4">
-                {/* Upgrade Button - Only show if FREE */}
-                {subscription === 'free' && (
-                    <button
-                        onClick={() => setIsPricingOpen(true)}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-200 to-yellow-400 hover:from-amber-300 hover:to-yellow-500 text-amber-900 rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-100 hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Upgrade</span>
-                    </button>
-                )}
+                {/* Save Button */}
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 whitespace-nowrap ml-8"
+                >
+                    {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                    <span>{projectId ? 'Save' : 'Save Design'}</span>
+                </button>
 
-                {/* Dark Mode Toggle */}
-                {setIsDarkMode && (
-                    <div className="relative group/tooltip">
-                        <button
-                            onClick={() => setIsDarkMode(!isDarkMode)}
-                            className={`p-2 rounded-xl transition-all ${isDarkMode
-                                ? 'bg-slate-900 text-yellow-400 shadow-md border border-slate-700'
-                                : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-200 hover:bg-slate-50'
-                                }`}
-                        >
-                            {isDarkMode ? <Monitor size={18} /> : <Monitor size={18} className="rotate-180" />}
-                        </button>
+                <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
-                        {/* Custom Tooltip */}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200">
-                            <div className="bg-white/95 backdrop-blur-xl text-slate-900 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 w-[200px] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Preview Mode</div>
-                                </div>
-                                <div className="text-xs text-slate-600 leading-relaxed font-medium tracking-tight">Simulates Dark Mode for email clients</div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                {/* Undo/Redo */}
+                {/* Editor/Preview Toggle */}
                 <div className="flex bg-slate-100/80 rounded-xl p-1 border border-slate-200/50">
                     <button
                         onClick={undo}
                         disabled={!canUndo()}
-                        title={`Rückgängig (${isMac ? '⌘Z' : 'Ctrl+Z'})`}
-                        className={`p-2 rounded-lg text-xs font-bold transition-all ${canUndo()
-                            ? 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'
-                            : 'text-slate-300 cursor-not-allowed'
-                            }`}
+                        className="p-1.5 hover:bg-white disabled:opacity-30 text-slate-500 hover:text-indigo-600 rounded-md transition-all disabled:hover:bg-transparent"
+                        title={`Undo (${isMac ? '⌘Z' : 'Ctrl+Z'})`}
                     >
                         <Undo2 size={16} />
                     </button>
                     <button
                         onClick={redo}
                         disabled={!canRedo()}
-                        title={`Wiederholen (${isMac ? '⌘⇧Z' : 'Ctrl+Y'})`}
-                        className={`p-2 rounded-lg text-xs font-bold transition-all ${canRedo()
-                            ? 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'
-                            : 'text-slate-300 cursor-not-allowed'
-                            }`}
+                        className="p-1.5 hover:bg-white disabled:opacity-30 text-slate-500 hover:text-indigo-600 rounded-md transition-all disabled:hover:bg-transparent"
+                        title={`Redo (${isMac ? '⌘Y' : 'Ctrl+Y'})`}
                     >
                         <Redo2 size={16} />
                     </button>
-                </div>
 
-                {/* Editor/Preview Toggle */}
-                <div className="flex bg-slate-100/80 rounded-xl p-1 border border-slate-200/50">
+                    <div className="w-px h-4 bg-slate-200 mx-1 my-auto"></div>
+
                     <button
                         onClick={() => setViewMode('editor')}
                         className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'editor'
@@ -196,7 +269,7 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
                 <button
                     onClick={() => setIsMagicOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200 active:scale-95"
                 >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Magic</span>
@@ -204,11 +277,13 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
                 <button
                     onClick={onOpenTemplates}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold transition-all border border-slate-200/60 shadow-sm hover:shadow-md active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold transition-all border border-slate-200/60 shadow-sm active:scale-95"
                 >
                     <LayoutTemplate className="w-4 h-4 text-indigo-500" />
                     <span>Templates</span>
                 </button>
+
+
 
                 {/* Export Dropdown */}
                 <div className="relative" onMouseLeave={() => setIsExportOpen(false)}>
@@ -224,12 +299,12 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
                     {isExportOpen && (
                         <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                             <div className="px-3 py-2 border-b border-slate-50 mb-1">
-                                <p className="text-xs font-bold text-slate-900">Export Options</p>
+                                <div className="text-xs font-bold text-slate-900">Export Options</div>
                             </div>
 
                             <button
                                 onClick={() => {
-                                    handleCopyVisual();
+                                    handleExport('visual');
                                     setIsExportOpen(false);
                                 }}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
@@ -243,7 +318,7 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
                             <button
                                 onClick={() => {
-                                    handleCopyHtml();
+                                    handleExport('code');
                                     setIsExportOpen(false);
                                 }}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
@@ -256,17 +331,8 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
                             </button>
 
                             <button
-                                onClick={async () => {
-                                    const html = await renderEmail(blocks, settings);
-                                    const blob = new Blob([html], { type: 'text/html' });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `plainly-email-${Date.now()}.html`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    URL.revokeObjectURL(url);
+                                onClick={() => {
+                                    handleExport('file');
                                     setIsExportOpen(false);
                                 }}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
@@ -314,17 +380,81 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
                     {isProfileOpen && (
                         <div className="absolute top-full right-0 mt-4 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="px-3 py-2 border-b border-slate-50 mb-1">
-                                <p className="text-xs font-bold text-slate-900">Signed in as</p>
-                                <p className="text-xs text-slate-500 truncate">{user?.email || session?.user?.email || 'Not logged in'}</p>
+                                <div className="text-xs font-bold text-slate-900">Signed in as</div>
+                                <div className="text-xs text-slate-500 truncate">{user?.email || session?.user?.email || 'Not logged in'}</div>
                             </div>
+
+                            <button
+                                onClick={() => {
+                                    if (isDirty) {
+                                        setShowResetConfirm(true);
+                                    } else {
+                                        resetProject();
+                                    }
+                                    setIsProfileOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                            >
+                                <Plus size={18} className="text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">New Design</div>
+                                    <div className="text-[10px] text-slate-500 text-left -mt-0.5">Start fresh</div>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsHistoryOpen(true);
+                                    setIsProfileOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
+                            >
+                                <LayoutTemplate size={18} className="text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">My Emails</div>
+                                    <div className="text-[10px] text-slate-500 text-left -mt-0.5">Project history</div>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    onOpenTemplates();
+                                    setIsProfileOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors md:hidden"
+                            >
+                                <Copy size={18} className="text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">Templates</div>
+                                    <div className="text-[10px] text-slate-500 text-left -mt-0.5">Gallery & Layouts</div>
+                                </div>
+                            </button>
+
+                            {setIsDarkMode && (
+                                <button
+                                    onClick={() => {
+                                        setIsDarkMode(!isDarkMode);
+                                        setIsProfileOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
+                                >
+                                    {isDarkMode ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} className="text-slate-400" />}
+                                    <div>
+                                        <div className="font-bold text-slate-900">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</div>
+                                        <div className="text-[10px] text-slate-500 text-left -mt-0.5">Toggle preview theme</div>
+                                    </div>
+                                </button>
+                            )}
+
+                            <div className="h-px bg-slate-100 my-1"></div>
+
                             <button
                                 onClick={() => {
                                     setShowSettings(true);
                                     setIsProfileOpen(false);
                                 }}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors"
                             >
-                                <Settings size={16} />
+                                <Settings size={18} className="text-slate-400" />
                                 <span>Settings</span>
                             </button>
                             {/* Mobile Upgrade Option */}
@@ -372,7 +502,20 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
             <ProfileSettings isOpen={showSettings} onClose={() => setShowSettings(false)} user={user} />
             <MagicGeneratorModal isOpen={isMagicOpen} onClose={() => setIsMagicOpen(false)} />
-            <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} currentPlan={subscription as 'free' | 'pro' | 'agency'} />
+            <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} currentPlan={subscription} />
+            <ProjectHistory isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+
+            <ConfirmDialog
+                isOpen={showResetConfirm}
+                onClose={() => setShowResetConfirm(false)}
+                onConfirm={resetProject}
+                title="Discard Design?"
+                description="You have unsaved changes. Starting a new project will permanently lose your current progress."
+                confirmText="Discard & Start Fresh"
+                cancelText="Keep Editing"
+                variant="warning"
+                icon="reset"
+            />
         </header>
     );
 };

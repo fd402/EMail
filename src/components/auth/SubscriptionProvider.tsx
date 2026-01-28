@@ -44,9 +44,10 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
             // 2. Fetch reliable status from Server Action
             console.log('[SubProvider] Fetching subscription status from server...');
             try {
-                const { plan, status, debug } = await getSubscriptionStatus();
-                console.log('[SubProvider] Server Status:', { plan, status, debug });
+                const { plan, status, exportCount, debug } = await getSubscriptionStatus();
+                console.log('[SubProvider] Server Status:', { plan, status, exportCount, debug });
                 setSubscription(plan as SubscriptionPlan);
+                if (exportCount !== undefined) useEmailStore.getState().setUsage(exportCount);
             } catch (err) {
                 console.error('[SubProvider] Server action failed', err);
                 setSubscription('free');
@@ -68,9 +69,10 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
                 // Re-fetch from server to be sure
                 // Small delay to ensure DB updates if this was a new signup
                 setTimeout(async () => {
-                    const { plan } = await getSubscriptionStatus();
-                    console.log('[SubProvider] Auth Change Update:', plan);
+                    const { plan, exportCount } = await getSubscriptionStatus();
+                    console.log('[SubProvider] Auth Change Update:', { plan, exportCount });
                     setSubscription(plan as SubscriptionPlan);
+                    if (exportCount !== undefined) useEmailStore.getState().setUsage(exportCount);
                 }, 1000);
             }
         });

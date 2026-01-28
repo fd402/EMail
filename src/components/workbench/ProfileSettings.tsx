@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, User, Save } from 'lucide-react';
+import { X, User, Save, RefreshCw } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { signOut } from '@/app/actions/supabase-auth';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useEmailStore } from '@/store/useEmailStore';
 import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { getSubscriptionStatus } from '@/app/actions/subscription';
 import { uploadAvatar } from '@/lib/upload';
 
 interface ProfileSettingsProps {
@@ -25,6 +26,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const storeSubscription = useEmailStore((state) => state.subscription);
     const [debugSource, setDebugSource] = useState('Init');
+    const exportCount = useEmailStore((state) => state.exportCount);
 
     // NextAuth Session
     const { data: session, status } = useSession();
@@ -112,6 +114,15 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
             setName('User');
         }
     }, [internalUser, session]);
+
+    // Fetch latest usage on mount/open
+    useEffect(() => {
+        if (isOpen && storeSubscription === 'free') {
+            getSubscriptionStatus().then(status => {
+                if (status.exportCount !== undefined) useEmailStore.getState().setUsage(status.exportCount);
+            });
+        }
+    }, [isOpen, storeSubscription]);
 
     const handleLogout = async () => {
         try {
@@ -208,7 +219,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                     />
                                 </div>
                                 <h3 className="text-lg font-black text-slate-900 mb-0.5">{name || 'Loading...'}</h3>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{email || '...'}</p>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{email || '...'}</div>
                             </div>
 
                             {/* Form */}
@@ -254,24 +265,48 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                                     <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">Active</span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-slate-500 font-medium">
+                                            <div className="text-xs text-slate-500 font-medium">
                                                 {storeSubscription === 'free' ? (
                                                     <div className="mt-3">
                                                         <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
-                                                            <span>Monthly Limit</span>
-                                                            <span className="text-orange-500">2 of 3 used</span>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <div className="relative flex h-2 w-2">
+                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                                                </div>
+                                                                Monthly Exports (Live)
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        const status = await getSubscriptionStatus();
+                                                                        if (status.exportCount !== undefined) useEmailStore.getState().setUsage(status.exportCount);
+                                                                    }}
+                                                                    className="p-1 hover:bg-slate-200 rounded-md transition-colors text-slate-400 hover:text-indigo-500"
+                                                                    title="Refresh usage"
+                                                                >
+                                                                    <RefreshCw size={12} />
+                                                                </button>
+                                                                <span className={exportCount >= 3 ? "text-rose-500" : "text-orange-500"}>
+                                                                    {exportCount} of 3 used
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-gradient-to-r from-orange-400 to-red-500 w-[66%] rounded-full"></div>
+                                                            <div
+                                                                className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-500"
+                                                                style={{ width: `${Math.min((exportCount / 3) * 100, 100)}%` }}
+                                                            ></div>
                                                         </div>
-                                                        <p className="text-[10px] text-slate-400 mt-2 font-medium">
-                                                            Reach the next level for unlimited exports.
-                                                        </p>
+                                                        <div className="text-[10px] text-slate-400 mt-2 font-medium">
+                                                            Upgrade for unlimited exports and premium templates.
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     'Thank you for supporting Plainly!'
                                                 )}
-                                            </p>
+                                            </div>
                                         </div>
 
                                         {storeSubscription === 'free' ? (
@@ -309,10 +344,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Support & Feedback</h4>
                                     <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900 mb-1">Questions or ideas?</p>
-                                            <p className="text-xs text-slate-500 font-medium max-w-xs">
+                                            <div className="text-sm font-bold text-slate-900 mb-1">Questions or ideas?</div>
+                                            <div className="text-xs text-slate-500 font-medium max-w-xs">
                                                 DM me directly on X (Twitter). I appreciate every feedback!
-                                            </p>
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => window.open('https://x.com/Feliixx0', '_blank')}

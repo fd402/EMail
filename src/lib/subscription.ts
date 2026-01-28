@@ -34,8 +34,9 @@ export const PLANS: Record<SubscriptionPlan, PlanDetails> = {
         price: '0 €',
         description: 'Perfect for getting started',
         features: [
+            '3 Project Saves',
+            '3 Basic Templates',
             'Basic Email Blocks',
-            '3 Exports / Month',
             'Community Support'
         ],
         allowedBlocks: BASIC_BLOCKS
@@ -43,12 +44,13 @@ export const PLANS: Record<SubscriptionPlan, PlanDetails> = {
     pro: {
         id: 'pro',
         name: 'Pro',
-        price: '19 €',
+        price: '25 €',
         description: 'For growing creators',
         features: [
-            'All Premium Blocks (Video, Countdown, etc.)',
-            'Unlimited Exports',
-            'Priority Support',
+            'Unlimited Project Saves',
+            'All 20+ Premium Templates',
+            'Everything in Free',
+            'AI Magic Generator (unlimited)',
             'Remove Branding'
         ],
         allowedBlocks: [...BASIC_BLOCKS, ...PREMIUM_BLOCKS]
@@ -56,21 +58,20 @@ export const PLANS: Record<SubscriptionPlan, PlanDetails> = {
     agency: {
         id: 'agency',
         name: 'Agency',
-        price: '49 €',
-        description: 'For teams and agencies',
+        price: '99 €',
+        description: 'For power users and teams',
         features: [
             'Everything in Pro',
-            'White Labeling',
-            'Team Management',
-            'Custom Domains'
+            'Unlimited Team Members',
+            'Custom Domain',
         ],
         allowedBlocks: [...BASIC_BLOCKS, ...PREMIUM_BLOCKS]
-    }
+    },
 };
 
 export const canUseBlock = (plan: SubscriptionPlan, blockType: BlockType): boolean => {
-    // Agency and Pro have all blocks
-    if (plan === 'agency' || plan === 'pro') return true;
+    // Pro and Agency have all blocks
+    if (plan === 'pro' || plan === 'agency') return true;
 
     // Free plan check
     return PLANS.free.allowedBlocks.includes(blockType);

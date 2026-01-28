@@ -13,11 +13,13 @@ interface TemplateGalleryProps {
 }
 
 export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ isOpen, onClose }) => {
-    const { loadTemplate, blocks } = useEmailStore();
+    const { loadTemplate, isDirty, blocks, subscription } = useEmailStore();
+    const isPro = subscription === 'pro';
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
     const [activeCategory, setActiveCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const [showProRequirement, setShowProRequirement] = useState(false);
 
     const categories = useMemo(() => {
         const cats = Array.from(new Set(EMAIL_TEMPLATES.map(t => t.category)));
@@ -34,7 +36,14 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ isOpen, onClos
     }, [activeCategory, searchQuery]);
 
     const handleTemplateClick = (template: EmailTemplate) => {
-        if (blocks.length > 0) {
+        // Check if template is free or user is pro
+        if (!template.isFree && subscription === 'free') {
+            setShowProRequirement(true);
+            return;
+        }
+
+        // Warn if there are unsaved changes OR if we are currently in a saved project
+        if (isDirty || (blocks && blocks.length > 5)) {
             setSelectedTemplate(template);
             setShowConfirmation(true);
         } else {
@@ -175,10 +184,15 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ isOpen, onClos
                                         </div>
 
                                         {/* Category Badge */}
-                                        <div className="absolute top-8 left-8">
+                                        <div className="absolute top-8 left-8 flex items-center gap-2">
                                             <span className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl text-[10px] font-black text-indigo-500 uppercase tracking-[0.15em] shadow-premium border border-indigo-50">
                                                 {template.category}
                                             </span>
+                                            {!template.isFree && !isPro && (
+                                                <span className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl text-[10px] font-black text-white uppercase tracking-[0.15em] shadow-lg shadow-amber-200 border border-amber-300">
+                                                    Pro Plan
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -213,37 +227,87 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ isOpen, onClos
                 </div>
             </div>
 
-            {/* Premium Confirmation Dialog */}
+            {/* Alarming Confirmation Dialog */}
             {showConfirmation && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 animate-in fade-in duration-500">
-                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-3xl" onClick={() => setShowConfirmation(false)} />
-                    <div className="relative w-full max-w-md bg-white/80 backdrop-blur-xl rounded-[3rem] shadow-2xl p-12 border border-white/40 animate-in zoom-in-95 duration-500 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-indigo-500 rounded-[2.5rem] flex items-center justify-center text-white mb-8 shadow-xl shadow-indigo-200 rotate-6 hover:rotate-0 transition-transform duration-500">
-                            <Layout size={40} fill="white" />
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl" onClick={() => setShowConfirmation(false)} />
+                    <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] p-10 md:p-14 border border-slate-200 animate-in zoom-in-95 duration-300 flex flex-col items-center text-center">
+
+                        <div className="w-24 h-24 bg-rose-500 rounded-[2.5rem] flex items-center justify-center text-white mb-10 shadow-2xl shadow-rose-200 animate-pulse">
+                            <Zap size={48} fill="white" />
                         </div>
 
-                        <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight leading-tight">Switch to<br />New Design?</h3>
+                        <h3 className="text-4xl font-black text-slate-900 mb-6 tracking-tighter leading-none">
+                            WAIT! UNSAVED CHANGES
+                        </h3>
 
-                        <p className="text-sm font-bold text-slate-500 mb-10 leading-relaxed px-4">
-                            Selecting "<span className="text-indigo-600 font-black">{selectedTemplate?.name}</span>" will replace your current workspace. Ready for the new look?
+                        <p className="text-lg font-bold text-slate-600 mb-12 leading-relaxed">
+                            You have <span className="text-rose-500 underline decoration-4 underline-offset-4">unsaved progress</span>. Loading "<span className="text-indigo-600 font-black">{selectedTemplate?.name}</span>" will clear your current layout.
                         </p>
 
-                        <div className="flex flex-col gap-3 w-full">
+                        <div className="flex flex-col gap-4 w-full">
                             <button
                                 onClick={confirmLoadTemplate}
-                                className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] text-[13px] font-black transition-all shadow-lg shadow-indigo-200 active:scale-95 group flex items-center justify-center gap-2"
+                                className="w-full py-6 bg-rose-500 hover:bg-rose-600 text-white rounded-[1.75rem] text-base font-black transition-all shadow-xl shadow-rose-200 active:scale-95 flex items-center justify-center gap-3"
                             >
-                                <span>Load Template</span>
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                <span>Discard & Load Template</span>
+                                <ArrowRight size={20} />
                             </button>
                             <button
                                 onClick={() => {
                                     setShowConfirmation(false);
                                     setSelectedTemplate(null);
                                 }}
-                                className="w-full py-5 text-[13px] font-black text-slate-400 hover:text-slate-900 transition-all"
+                                className="w-full py-6 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-[1.75rem] text-base font-black transition-all active:scale-95"
                             >
-                                Back to Gallery
+                                Continue Design
+                            </button>
+                        </div>
+
+                        <div className="mt-10 flex items-center gap-2 text-rose-500/60">
+                            <ShieldCheck size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Unsaved changes will be lost</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PRO REQUIREMENT OVERLAY */}
+            {showProRequirement && (
+                <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-2xl" onClick={() => setShowProRequirement(false)} />
+                    <div className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] p-12 md:p-16 border border-slate-200 animate-in zoom-in-95 duration-300 flex flex-col items-center text-center">
+
+                        <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-500 rounded-[2.5rem] flex items-center justify-center text-white mb-10 shadow-2xl shadow-amber-200 animate-bounce">
+                            <Sparkles size={48} fill="white" />
+                        </div>
+
+                        <h3 className="text-4xl font-black text-slate-900 mb-6 tracking-tighter leading-none">
+                            UNLOCK PRO STYLES
+                        </h3>
+
+                        <p className="text-lg font-bold text-slate-600 mb-12 leading-relaxed">
+                            This premium template is exclusive to our <span className="text-indigo-600 font-black">Pro Members</span>. Upgrade now to access all 20+ professional designs.
+                        </p>
+
+                        <div className="flex flex-col gap-4 w-full">
+                            <button
+                                onClick={() => {
+                                    // Normally we would open pricing here
+                                    // For now, let's just close and maybe tell the user how to upgrade
+                                    setShowProRequirement(false);
+                                    onClose(); // Close gallery so they see the editor/pricing link
+                                }}
+                                className="w-full py-6 bg-indigo-600 hover:bg-slate-900 text-white rounded-[1.75rem] text-base font-black transition-all shadow-xl shadow-indigo-200 active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                <span>View Pricing Plans</span>
+                                <ArrowRight size={20} />
+                            </button>
+                            <button
+                                onClick={() => setShowProRequirement(false)}
+                                className="w-full py-6 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-[1.75rem] text-base font-black transition-all active:scale-95"
+                            >
+                                Not Now
                             </button>
                         </div>
                     </div>

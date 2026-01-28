@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="relative z-10 text-xs font-medium text-indigo-200">
-                    © 2024 Plainly Inc.
+                    © 2026 Plainly Inc.
                 </div>
             </div>
 
