@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
                     stripe_customer_id: subscription.customer as string,
                     subscription_status: subscription.status,
                     subscription_plan: session.metadata?.plan || 'pro',
-                    subscription_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                    subscription_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
                 }).eq('id', user.id);
 
                 return NextResponse.json({

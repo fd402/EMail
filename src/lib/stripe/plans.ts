@@ -80,9 +80,11 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
 export const STRIPE_PRICE_IDS = {
     pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
     pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || '',
+    agency_monthly: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID || '',
+    agency_yearly: process.env.STRIPE_AGENCY_YEARLY_PRICE_ID || '',
 };
 
-export function getPriceId(plan: 'pro', period: BillingPeriod): string {
+export function getPriceId(plan: 'pro' | 'agency', period: BillingPeriod): string {
     const key = `${plan}_${period}` as keyof typeof STRIPE_PRICE_IDS;
     return STRIPE_PRICE_IDS[key];
 }
