@@ -21,3 +21,25 @@ export const uploadAvatar = async (file: File, userId: string): Promise<string> 
 
     return data.publicUrl;
 };
+
+export const uploadImage = async (file: File): Promise<string> => {
+    const supabase = createClient();
+    const fileExt = file.name.split('.').pop();
+    const fileName = `uploads/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file, {
+            upsert: true,
+        });
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    const { data } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+};

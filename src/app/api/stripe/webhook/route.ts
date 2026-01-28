@@ -76,7 +76,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     if (!userId || !session.subscription) return;
 
-    const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+    const subscription = (await stripe.subscriptions.retrieve(session.subscription as string)) as Stripe.Subscription;
 
     await supabaseAdmin
         .from('profiles')
@@ -84,7 +84,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
             stripe_subscription_id: subscription.id,
             subscription_status: subscription.status,
             subscription_plan: plan,
-            subscription_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            subscription_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
         })
         .eq('id', userId);
 }
@@ -128,7 +128,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         .update({
             subscription_status: subscription.status,
             subscription_plan: plan,
-            subscription_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            subscription_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
         })
         .eq('id', profile.id);
 }

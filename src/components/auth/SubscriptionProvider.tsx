@@ -1,13 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { useEmailStore } from '@/store/useEmailStore';
 import { SubscriptionPlan } from '@/lib/stripe/plans';
 import { getSubscriptionStatus } from '@/app/actions/subscription';
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
+    return (
+        <>
+            <Suspense fallback={null}>
+                <SubscriptionLogic />
+            </Suspense>
+            {children}
+        </>
+    );
+}
+
+function SubscriptionLogic() {
     const { setSubscription } = useEmailStore();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -57,7 +69,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         syncSubscription();
 
         // 3. Listen for auth changes to re-fetch
-        const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
             console.log('[SubProvider] Auth Event:', event);
 
             if (event === 'SIGNED_OUT') {
@@ -120,5 +132,5 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         };
     }, [setSubscription]);
 
-    return <>{children}</>;
+    return null;
 }
