@@ -17,6 +17,8 @@ interface StateSnapshot {
         backgroundColor: string;
         workbenchColor: string;
         containerWidth?: string;
+        preheader?: string;
+        activeTheme?: string;
     };
 }
 
@@ -39,8 +41,10 @@ interface EmailStore {
         backgroundColor: string;
         workbenchColor: string;
         containerWidth?: string;
+        preheader?: string;
+        activeTheme?: string;
     };
-    updateSettings: (settings: Partial<{ backgroundColor: string; workbenchColor: string; containerWidth?: string }>) => void;
+    updateSettings: (settings: Partial<{ backgroundColor: string; workbenchColor: string; containerWidth?: string; preheader?: string; activeTheme?: string }>) => void;
 
     loadTemplate: (blocks: Block[], settings?: { backgroundColor?: string }) => void;
     applyTheme: (themeName: string) => void;
@@ -206,6 +210,8 @@ export const useEmailStore = create<EmailStore>((set, get) => ({
         backgroundColor: '#ffffff',
         workbenchColor: '#f8fafc',
         containerWidth: '600px',
+        preheader: '',
+        activeTheme: 'Modern',
     },
 
     applyTheme: (themeName: string) => recordHistory(set)((state) => {
@@ -240,7 +246,7 @@ export const useEmailStore = create<EmailStore>((set, get) => ({
         });
 
         return {
-            settings: { ...state.settings, backgroundColor: theme.settings.backgroundColor },
+            settings: { ...state.settings, backgroundColor: theme.settings.backgroundColor, activeTheme: themeName },
             blocks: newBlocks
         };
     }),

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Code, Copy, Monitor, Smartphone, LayoutTemplate, ChevronDown, Settings, LogOut, User, Undo2, Redo2, Sparkles, Moon, Sun, MessageSquare } from 'lucide-react';
+import { Eye, Code, Copy, Monitor, Smartphone, LayoutTemplate, ChevronDown, Settings, LogOut, User, Undo2, Redo2, Sparkles, Moon, Sun, MessageSquare, Share2, Download } from 'lucide-react';
 import { ProfileSettings } from './ProfileSettings';
 import { useEmailStore } from '@/store/useEmailStore';
 import { renderEmail } from '@/lib/renderEmail';
@@ -25,6 +25,7 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const { data: session } = useSession();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isExportOpen, setIsExportOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [isMagicOpen, setIsMagicOpen] = useState(false);
     const [isPricingOpen, setIsPricingOpen] = useState(false);
@@ -120,16 +121,28 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
 
                 {/* Dark Mode Toggle */}
                 {setIsDarkMode && (
-                    <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        className={`p-2 rounded-xl transition-all ${isDarkMode
-                            ? 'bg-slate-900 text-yellow-400 shadow-md border border-slate-700'
-                            : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-200 hover:bg-slate-50'
-                            }`}
-                        title="Toggle Dark Mode"
-                    >
-                        {isDarkMode ? <Monitor size={18} /> : <Monitor size={18} className="rotate-180" />}
-                    </button>
+                    <div className="relative group/tooltip">
+                        <button
+                            onClick={() => setIsDarkMode(!isDarkMode)}
+                            className={`p-2 rounded-xl transition-all ${isDarkMode
+                                ? 'bg-slate-900 text-yellow-400 shadow-md border border-slate-700'
+                                : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                }`}
+                        >
+                            {isDarkMode ? <Monitor size={18} /> : <Monitor size={18} className="rotate-180" />}
+                        </button>
+
+                        {/* Custom Tooltip */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200">
+                            <div className="bg-white/95 backdrop-blur-xl text-slate-900 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 w-[200px] animate-in fade-in slide-in-from-top-2 duration-300">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Preview Mode</div>
+                                </div>
+                                <div className="text-xs text-slate-600 leading-relaxed font-medium tracking-tight">Simulates Dark Mode for email clients</div>
+                            </div>
+                        </div>
+                    </div>
                 )}
                 {/* Undo/Redo */}
                 <div className="flex bg-slate-100/80 rounded-xl p-1 border border-slate-200/50">
@@ -197,13 +210,81 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
                     <span>Templates</span>
                 </button>
 
-                <button
-                    onClick={handleCopyVisual}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
-                >
-                    <Copy className="w-4 h-4" />
-                    <span>Export Email</span>
-                </button>
+                {/* Export Dropdown */}
+                <div className="relative" onMouseLeave={() => setIsExportOpen(false)}>
+                    <button
+                        onClick={() => setIsExportOpen(!isExportOpen)}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+                    >
+                        <Share2 className="w-4 h-4" />
+                        <span>Export</span>
+                        <ChevronDown className={`w-3.5 h-3.5 ml-1 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isExportOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                            <div className="px-3 py-2 border-b border-slate-50 mb-1">
+                                <p className="text-xs font-bold text-slate-900">Export Options</p>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    handleCopyVisual();
+                                    setIsExportOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
+                            >
+                                <Copy className="w-4 h-4 text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">Copy for Mail Apps</div>
+                                    <div className="text-[10px] text-slate-500">Gmail, Outlook, Apple Mail</div>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    handleCopyHtml();
+                                    setIsExportOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
+                            >
+                                <Code className="w-4 h-4 text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">Copy HTML Code</div>
+                                    <div className="text-[10px] text-slate-500">For developers & tools</div>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    const html = await renderEmail(blocks, settings);
+                                    const blob = new Blob([html], { type: 'text/html' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `plainly-email-${Date.now()}.html`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                    setIsExportOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-colors text-left"
+                            >
+                                <Download className="w-4 h-4 text-slate-400" />
+                                <div>
+                                    <div className="font-bold text-slate-900">Download HTML File</div>
+                                    <div className="text-[10px] text-slate-500">Save as .html</div>
+                                </div>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Click outside listener */}
+                    {isExportOpen && (
+                        <div className="fixed inset-0 z-[40]" onClick={() => setIsExportOpen(false)} />
+                    )}
+                </div>
 
                 <div className="h-6 w-px bg-slate-200 mx-1"></div>
 

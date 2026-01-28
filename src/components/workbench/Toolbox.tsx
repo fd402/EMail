@@ -305,12 +305,12 @@ export const Toolbox = () => {
                         transform: 'translateY(-50%)'
                     }}
                 >
-                    <div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-elevated border border-white/10 max-w-[260px] animate-in fade-in slide-in-from-left-4 duration-300">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                            <div className="text-xs font-black uppercase tracking-widest text-indigo-300">{tooltip.tool.label}</div>
+                    <div className="bg-white/95 backdrop-blur-xl text-slate-900 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 max-w-[260px] animate-in fade-in slide-in-from-left-4 duration-300">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                            <div className="text-xs font-black uppercase tracking-widest text-indigo-600">{tooltip.tool.label}</div>
                         </div>
-                        <div className="text-[13px] text-slate-300 leading-relaxed font-medium tracking-tight font-sans italic">{tooltip.tool.description}</div>
+                        <div className="text-sm text-slate-600 leading-relaxed font-medium tracking-tight font-sans">{tooltip.tool.description}</div>
                     </div>
                 </div>
             )}

@@ -6,6 +6,7 @@ import { LandingNavbar } from '@/components/landing/LandingNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingIntegrations } from '@/components/landing/LandingIntegrations';
 import { LandingTestimonials } from '@/components/landing/LandingTestimonials';
+import { LandingPlayground } from '@/components/landing/LandingPlayground';
 
 export default function LandingPage() {
     return (
@@ -30,7 +31,8 @@ export default function LandingPage() {
                     </h1>
 
                     <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                        Stop coding HTML tables. Build stunning, responsive emails in seconds with our drag & drop editor powered by AI.
+                        Stop coding HTML tables. Build stunning, responsive emails in seconds with our drag & drop editor powered by AI. <br className="hidden md:block" />
+                        <span className="text-slate-900 font-semibold">Exports ready for Mailchimp, HubSpot & SendGrid.</span>
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
@@ -43,17 +45,11 @@ export default function LandingPage() {
                         </button>
                     </div>
 
-                    {/* Hero Visual */}
-                    <div className="mt-20 relative px-4 animate-in fade-in zoom-in duration-1000 delay-500">
-                        <div className="bg-slate-900/5 backdrop-blur-lg rounded-[2.5rem] p-4 max-w-5xl mx-auto border border-white/20 shadow-2xl">
-                            <div className="bg-white rounded-[2rem] overflow-hidden shadow-inner border border-slate-100">
-                                <img src="https://placehold.co/2400x1200/ffffff/e2e8f0?text=Editor+Interface+Preview" alt="Editor" className="w-full h-auto opacity-90" />
-                                {/* In a real app, put a screenshot of the editor here */}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
+
+            {/* Interactive Theme Playground (Aha Moment) */}
+            <LandingPlayground />
 
             {/* Integrations */}
             <LandingIntegrations />

@@ -3,12 +3,12 @@ import { render } from '@react-email/render';
 import { Html, Head, Preview, Body, Container, Section, Text, Button, Img } from '@react-email/components';
 import React from 'react';
 
-export const renderEmail = async (blocks: Block[], settings: { backgroundColor: string; workbenchColor: string; containerWidth?: string } = { backgroundColor: '#f3f4f6', workbenchColor: '#f3f4f6', containerWidth: '600px' }) => {
+export const renderEmail = async (blocks: Block[], settings: { backgroundColor: string; workbenchColor: string; containerWidth?: string; preheader?: string } = { backgroundColor: '#f3f4f6', workbenchColor: '#f3f4f6', containerWidth: '600px', preheader: '' }) => {
     const html = await render(<EmailTemplate blocks={blocks} settings={settings} />);
     return html;
 };
 
-const EmailTemplate = ({ blocks, settings }: { blocks: Block[], settings: { backgroundColor: string; workbenchColor?: string; containerWidth?: string } }) => {
+const EmailTemplate = ({ blocks, settings }: { blocks: Block[], settings: { backgroundColor: string; workbenchColor?: string; containerWidth?: string; preheader?: string } }) => {
     return (
         <Html>
             <Head>
@@ -21,6 +21,7 @@ const EmailTemplate = ({ blocks, settings }: { blocks: Block[], settings: { back
                   } 
                 `}</style>
             </Head>
+            {settings.preheader && <Preview>{settings.preheader}</Preview>}
 
             <Body style={{ backgroundColor: settings.workbenchColor || '#f3f4f6', fontFamily: 'Arial, sans-serif', margin: '0 auto', padding: '20px 0', minHeight: '100%', verticalAlign: 'top' }}>
                 <Container style={{ backgroundColor: settings.backgroundColor, margin: '0 auto', maxWidth: settings.containerWidth || '600px', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', verticalAlign: 'top' }}>
@@ -45,57 +46,40 @@ const EmailTemplate = ({ blocks, settings }: { blocks: Block[], settings: { back
                                 </Section>
                             )}
                             {block.type === 'button' && (
-                                <Section style={{ textAlign: (block.styles.textAlign || 'center') as any, padding: block.styles.padding || '10px 0' }}>
-                                    {/* Bulletproof Button - Works in all email clients including Outlook */}
-                                    <table border={0} cellSpacing="0" cellPadding="0" align={(block.styles.textAlign || 'center') as any}>
-                                        <tbody>
-                                            <tr>
-                                                <td align="center" style={{
-                                                    backgroundColor: block.styles.backgroundColor || '#6366f1',
-                                                    borderRadius: block.styles.borderRadius || '12px',
-                                                } as React.CSSProperties & { msoHide?: string }}>
-                                                    <a href={block.content.url} target="_blank" style={{
-                                                        display: 'inline-block',
-                                                        // Match Editor: padding '12px 24px' is default in CanvasBlock
-                                                        padding: block.styles.height && block.styles.height !== 'auto'
-                                                            ? `0 ${block.styles.padding?.split(' ')[1] || '24px'}`
-                                                            : (block.styles.padding || '12px 24px'),
-                                                        backgroundColor: block.styles.backgroundColor || '#6366f1',
-                                                        borderRadius: block.styles.borderRadius || '12px',
-                                                        color: block.styles.color || '#ffffff',
-                                                        fontSize: block.styles.fontSize || '16px',
-                                                        fontWeight: block.styles.fontWeight || 'bold',
-                                                        fontFamily: block.styles.fontFamily || 'Arial, sans-serif',
-                                                        textDecoration: 'none',
-                                                        // Match Editor: lineHeight '1.2'
-                                                        lineHeight: '1.2',
-                                                        // Ensure text wrapping matches Editor
-                                                        whiteSpace: 'normal',
-                                                        wordBreak: 'normal', // Don't break words arbitrarily
-                                                        overflowWrap: 'break-word', // Only break long words if necessary
-                                                        maxWidth: '100%',
-                                                        minWidth: '100px', // Match Editor constraint
-                                                        width: block.styles.width || 'auto', // Default to auto width
-                                                        textAlign: 'center',
-                                                        boxSizing: 'border-box'
-                                                    }}>
-                                                        {block.content.text}
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                    {/* VML Button for Outlook 2007-2019 */}
-                                    <div dangerouslySetInnerHTML={{
-                                        __html: `<!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${block.content.url}" style="height:auto;v-text-anchor:middle;width:${parseInt(block.styles.width as string) < 100 ? '100px' : (block.styles.width || 'auto')};" arcsize="${Math.min(100, parseInt(block.styles.borderRadius || '12') * 2.5)}%" strokecolor="${block.styles.backgroundColor || '#6366f1'}" fillcolor="${block.styles.backgroundColor || '#6366f1'}">
-                                            <w:anchorlock/>
-                                            <center style="color:${block.styles.color || '#ffffff'};font-family:${block.styles.fontFamily || 'Arial, sans-serif'};font-size:${block.styles.fontSize || '16px'};font-weight:${block.styles.fontWeight || 'bold'};mso-line-height-rule:exactly;line-height:${block.styles.lineHeight || '1.4'};">${block.content.text}</center>
-                                        </v:roundrect>
-                                        <![endif]-->`
-                                    }} />
-                                </Section>
+                                <div style={{
+                                    width: '100%',
+                                    textAlign: (block.styles.textAlign || 'center') as any,
+                                    padding: block.styles.padding
+                                }}>
+                                    {/* Use a span wrapper to isolate the button context completely */}
+                                    <span style={{ display: 'inline-block' }}>
+                                        <a href={block.content.url} target="_blank" style={{
+                                            // Flexbox ensures perfect centering if width/height are set
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            padding: '12px 24px',
+                                            backgroundColor: block.styles.backgroundColor || '#6366f1',
+                                            borderRadius: block.styles.borderRadius || '12px',
+                                            color: block.styles.color || '#ffffff',
+                                            fontSize: block.styles.fontSize || '16px',
+                                            fontWeight: block.styles.fontWeight || 'bold',
+                                            fontFamily: block.styles.fontFamily || 'Arial, sans-serif',
+                                            textDecoration: 'none',
+                                            lineHeight: '1.2',
+                                            whiteSpace: 'normal',
+                                            maxWidth: '100%',
+                                            // Restore explicit width sizing if set (but differentiate from 100% default if needed)
+                                            // We trust the block styles now. If user resized it, use that value.
+                                            width: block.styles.width || 'auto',
+                                            height: block.styles.height || 'auto',
+                                            textAlign: 'center',
+                                            boxSizing: 'border-box'
+                                        }}>
+                                            {block.content.text}
+                                        </a>
+                                    </span>
+                                </div>
                             )}
                             {block.type === 'image' && (
                                 <Section style={{ padding: '10px 0', textAlign: (block.styles.textAlign || 'center') as any }}>
@@ -322,14 +306,53 @@ const EmailTemplate = ({ blocks, settings }: { blocks: Block[], settings: { back
 
                             {block.type === 'table' && (
                                 <Section style={{ padding: '10px 0' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'fixed' }}>
                                         <tbody>
-                                            {block.content.rows?.map((row: any, i: number) => (
-                                                <tr key={i} style={{ backgroundColor: block.content.striped && i % 2 === 1 ? '#f9fafb' : 'transparent' }}>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', fontWeight: 'bold', color: block.content.textColor }}>{row.label}</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right', color: block.content.textColor }}>{row.value}</td>
-                                                </tr>
-                                            ))}
+                                            {block.content.rows?.map((row: any, i: number) => {
+                                                const colCount = block.content.hasThirdColumn ? 3 : 2;
+                                                const width = `${100 / colCount}%`;
+                                                return (
+                                                    <tr key={i} style={{ backgroundColor: block.content.striped && i % 2 === 1 ? '#f9fafb' : 'transparent' }}>
+                                                        <td style={{
+                                                            padding: '8px',
+                                                            borderBottom: '1px solid #eee',
+                                                            fontWeight: block.content.boldFirstColumn !== false ? 'bold' : 'normal',
+                                                            color: block.content.textColor,
+                                                            width: width,
+                                                            wordBreak: 'break-word',
+                                                            verticalAlign: 'top'
+                                                        }}>
+                                                            {row.label}
+                                                        </td>
+                                                        <td style={{
+                                                            padding: '8px',
+                                                            borderBottom: '1px solid #eee',
+                                                            textAlign: 'right',
+                                                            color: block.content.textColor,
+                                                            width: width,
+                                                            wordBreak: 'break-word',
+                                                            verticalAlign: 'top'
+                                                        }}>
+                                                            {row.value}
+                                                        </td>
+                                                        {block.content.hasThirdColumn && (
+                                                            <td style={{
+                                                                padding: '8px',
+                                                                borderBottom: '1px solid #eee',
+                                                                textAlign: 'right',
+                                                                color: block.content.textColor,
+                                                                opacity: 0.7,
+                                                                fontSize: '12px',
+                                                                width: width,
+                                                                wordBreak: 'break-all',
+                                                                verticalAlign: 'top'
+                                                            }}>
+                                                                {row.col3 || ''}
+                                                            </td>
+                                                        )}
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </Section>

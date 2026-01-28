@@ -127,6 +127,8 @@ export default function Home() {
         styles: getDefaultStyles(type),
       };
       addBlock(newBlock);
+      // Auto-select the new block immediately to open settings
+      useEmailStore.getState().selectBlock(newBlockId);
       return;
     }
 

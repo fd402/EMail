@@ -45,8 +45,17 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
 
     // For buttons, we don't want the container to have the background color
     const containerStyle: Record<string, any> = { ...block.styles };
-    // These blocks handle sizing internally or via children, and need full width container for alignment
-    if (['button', 'image', 'social', 'video', 'menu', 'product-card', 'nps', 'countdown', 'qr', 'table', 'image-text', 'event', 'audio', 'pros-cons', 'alert', 'code', 'divider'].includes(block.type)) {
+    // Button: Needs padding for spacing, but NO background/border (that belongs to the button itself)
+    if (block.type === 'button') {
+        delete containerStyle.backgroundColor;
+        delete containerStyle.border;
+        delete containerStyle.borderRadius;
+        delete containerStyle.width;
+        delete containerStyle.height;
+        // Optimization: Keep padding!
+    }
+    // Other blocks: handle sizing internally or via children, need full width container, usually strip all container styles
+    else if (['image', 'social', 'video', 'menu', 'product-card', 'nps', 'countdown', 'qr', 'table', 'image-text', 'event', 'audio', 'pros-cons', 'alert', 'code', 'divider'].includes(block.type)) {
         delete containerStyle.backgroundColor;
         delete containerStyle.border;
         delete containerStyle.borderRadius;
@@ -79,13 +88,13 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                                 setShowAIMenu(!showAIMenu);
                             }}
                             disabled={isAILoading || !block.content.text}
-                            className={`bg-white p-2 rounded-2xl shadow-premium border transition-all duration-200 ${isAILoading
+                            className={`bg-white w-8 h-8 flex items-center justify-center rounded-2xl shadow-premium border transition-all duration-200 ${isAILoading
                                 ? 'text-slate-300 border-slate-100'
                                 : 'text-indigo-500 border-indigo-100 hover:bg-indigo-50 hover:border-indigo-200'
                                 }`}
                             title="AI Writer"
                         >
-                            {isAILoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                            {isAILoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                         </button>
 
                         {showAIMenu && (
@@ -153,7 +162,7 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                         e.stopPropagation();
                         removeBlock(block.id);
                     }}
-                    className="bg-white text-slate-400 hover:text-rose-500 p-2 rounded-2xl shadow-premium border border-slate-100 hover:border-rose-100 hover:bg-rose-50/50 transition-all duration-200"
+                    className="bg-white text-slate-400 hover:text-rose-500 w-8 h-8 flex items-center justify-center rounded-2xl shadow-premium border border-slate-100 hover:border-rose-100 hover:bg-rose-50/50 transition-all duration-200"
                     title="Delete Block"
                 >
                     <Trash2 size={16} />
@@ -192,64 +201,73 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                         width: '100%'
                     }}
                 >
-                    <div style={{ width: 'fit-content', display: 'inline-block' }}>
-                        <Resizable
-                            size={{
-                                width: block.styles.width || 'auto',
-                                height: block.styles.height || 'auto'
-                            }}
-                            minWidth={100}
-                            minHeight={40}
-                            onResizeStop={(e, direction, ref, d) => {
-                                updateBlock(block.id, {
-                                    styles: {
-                                        ...block.styles,
-                                        width: ref.style.width,
-                                        height: ref.style.height,
-                                    }
-                                });
-                            }}
+                    <Resizable
+                        size={{
+                            width: block.styles.width || 'auto',
+                            height: block.styles.height || 'auto'
+                        }}
+                        minWidth={100}
+                        minHeight={40}
+                        maxWidth="100%"
+                        onResizeStop={(e, direction, ref, d) => {
+                            updateBlock(block.id, {
+                                styles: {
+                                    ...block.styles,
+                                    width: ref.style.width,
+                                    height: ref.style.height,
+                                }
+                            });
+                        }}
+                        style={{
+                            width: block.styles.width || 'auto',
+                            height: block.styles.height || 'auto',
+                            maxWidth: '100%',
+                        }}
+                        handleStyles={{
+                            topLeft: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', left: '-5px', top: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                            topRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', top: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                            bottomLeft: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', left: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                            bottomRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                        }}
+                        handleClasses={{
+                            topLeft: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            topRight: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            bottomLeft: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            bottomRight: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            left: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            right: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            top: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                            bottom: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        }}
+                        enable={{
+                            top: false, right: true, bottom: true, left: true,
+                            topRight: true, bottomRight: true, bottomLeft: true, topLeft: true
+                        }}
+                        className="relative group"
+                    >
+                        <div
+                            className="flex items-center justify-center w-full h-full pointer-events-none"
                             style={{
-                                width: block.styles.width || 'auto',
-                                height: block.styles.height || 'auto',
-                                maxWidth: '100%',
+                                backgroundColor: block.styles.backgroundColor,
+                                color: block.styles.color,
+                                fontFamily: block.styles.fontFamily || 'Arial, sans-serif',
+                                fontWeight: block.styles.fontWeight || 'bold',
+                                textDecoration: 'none',
+                                borderRadius: block.styles.borderRadius || '12px',
+                                whiteSpace: 'normal',
+                                wordBreak: 'normal',
+                                overflowWrap: 'break-word',
+                                textAlign: 'center',
+                                lineHeight: '1.2',
+                                padding: '12px 24px',
+                                width: '100%',
+                                height: '100%',
+                                boxSizing: 'border-box'
                             }}
-                            handleStyles={{
-                                topLeft: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', left: '-5px', top: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-                                topRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', top: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-                                bottomLeft: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', left: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-                                bottomRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-                            }}
-                            enable={{
-                                top: false, right: true, bottom: true, left: true,
-                                topRight: true, bottomRight: true, bottomLeft: true, topLeft: true
-                            }}
-                            className="relative group"
                         >
-                            <div
-                                className="flex items-center justify-center w-full h-full pointer-events-none"
-                                style={{
-                                    backgroundColor: block.styles.backgroundColor,
-                                    color: block.styles.color,
-                                    fontFamily: block.styles.fontFamily || 'Arial, sans-serif',
-                                    fontWeight: block.styles.fontWeight || 'bold',
-                                    textDecoration: 'none',
-                                    borderRadius: block.styles.borderRadius || '12px',
-                                    whiteSpace: 'normal',
-                                    wordBreak: 'normal',
-                                    overflowWrap: 'break-word',
-                                    textAlign: 'center',
-                                    lineHeight: '1.2',
-                                    padding: '12px 24px',
-                                    width: '100%',
-                                    height: '100%',
-                                    boxSizing: 'border-box'
-                                }}
-                            >
-                                {block.content.text}
-                            </div>
-                        </Resizable>
-                    </div>
+                            {block.content.text}
+                        </div>
+                    </Resizable>
                 </div>
             )}
 
@@ -260,6 +278,7 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                         width: block.styles.width || '100%',
                         height: 'auto'
                     }}
+                    maxWidth="100%"
                     onResizeStop={(e, direction, ref, d) => {
                         updateBlock(block.id, {
                             styles: {
@@ -274,6 +293,16 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                         topRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', top: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
                         bottomLeft: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', left: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
                         bottomRight: { width: '10px', height: '10px', background: 'white', border: '2px solid #6366f1', borderRadius: '4px', right: '-5px', bottom: '-5px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                    }}
+                    handleClasses={{
+                        topLeft: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        topRight: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        bottomLeft: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        bottomRight: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        left: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        right: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        top: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+                        bottom: 'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
                     }}
                     enable={{
                         top: false, right: true, bottom: false, left: true,
@@ -395,11 +424,16 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
                             {n}
                         </div>
                     ))}
-                    {block.content.variant === 'stars' && [1, 2, 3, 4, 5].map(n => (
-                        <div key={n} className="cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors p-1">
-                            <Star size={32} fill="currentColor" stroke="none" className="drop-shadow-sm" />
+                    {block.content.variant === 'stars' && (
+                        <div className="flex flex-row-reverse gap-1 justify-end">
+                            {[5, 4, 3, 2, 1].map(n => (
+                                <div key={n} className="cursor-pointer text-gray-300 hover:text-yellow-400 peer peer-hover:text-yellow-400 transition-colors p-1">
+                                    <Star size={32} fill="currentColor" stroke="none" className="drop-shadow-sm" />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
+
                     {block.content.variant === 'smileys' && (
                         <>
                             <div className="p-2 text-red-500 cursor-pointer hover:scale-110 transition-transform opacity-80 hover:opacity-100" title="Very Unhappy"><Angry size={32} /></div>
@@ -439,25 +473,42 @@ export const CanvasBlock = ({ block }: { block: Block }) => {
             )}
 
             {block.type === 'qr' && (
-                <div className="inline-block p-2 bg-white rounded border border-gray-100">
+                <div className="inline-block p-2 bg-white rounded border border-gray-100" style={{ width: 'fit-content' }}>
                     <img
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=${block.content.size}x${block.content.size}&data=${encodeURIComponent(block.content.value)}&color=${block.content.color.replace('#', '')}`}
                         alt="QR Code"
-                        style={{ width: block.content.size, height: block.content.size }}
+                        style={{ width: `${block.content.size}px`, height: `${block.content.size}px`, maxWidth: 'none' }}
+                        draggable={false}
                     />
                 </div>
             )}
 
             {block.type === 'table' && (
                 <div className="w-full inline-block">
-                    <table className="w-full text-sm border-collapse">
+                    <table className="w-full text-sm border-collapse table-fixed">
                         <tbody>
-                            {block.content.rows?.map((row: any, i: number) => (
-                                <tr key={i} style={{ backgroundColor: block.content.striped && i % 2 === 1 ? '#f9fafb' : 'transparent' }}>
-                                    <td className="p-2 border-b border-gray-100 font-semibold" style={{ color: block.content.textColor }}>{row.label}</td>
-                                    <td className="p-2 border-b border-gray-100 text-right" style={{ color: block.content.textColor }}>{row.value}</td>
-                                </tr>
-                            ))}
+                            {block.content.rows?.map((row: any, i: number) => {
+                                const colCount = block.content.hasThirdColumn ? 3 : 2;
+                                const width = `${100 / colCount}%`;
+                                return (
+                                    <tr key={i} style={{ backgroundColor: block.content.striped && i % 2 === 1 ? '#f9fafb' : 'transparent' }}>
+                                        <td
+                                            className={`p-2 border-b border-gray-100 align-top break-words ${block.content.boldFirstColumn !== false ? 'font-bold' : ''}`}
+                                            style={{ color: block.content.textColor, width }}
+                                        >
+                                            {row.label}
+                                        </td>
+                                        <td className="p-2 border-b border-gray-100 text-right align-top break-words" style={{ color: block.content.textColor, width }}>
+                                            {row.value}
+                                        </td>
+                                        {block.content.hasThirdColumn && (
+                                            <td className="p-2 border-b border-gray-100 text-right text-gray-500 text-xs align-top break-all" style={{ color: block.content.textColor, opacity: 0.7, width }}>
+                                                {row.col3 || ''}
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

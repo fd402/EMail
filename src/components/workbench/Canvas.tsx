@@ -14,7 +14,7 @@ export const Canvas = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
     return (
         <div
-            className="flex-1 h-full overflow-y-auto overflow-x-hidden flex justify-center p-12 transition-colors duration-200"
+            className="flex-1 h-full overflow-y-auto overflow-x-hidden custom-scrollbar flex justify-center p-12 transition-colors duration-200"
             style={{ backgroundColor: settings.workbenchColor || 'transparent' }} // Let the grid show through if transparent
             onClick={() => selectBlock(null)}
         >

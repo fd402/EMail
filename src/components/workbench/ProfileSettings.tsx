@@ -54,7 +54,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
             }
         } catch (error) {
             console.error('Avatar upload failed:', error);
-            alert('Fehler beim Upload des Profilbilds.');
+            alert('Error uploading profile picture.');
         } finally {
             setIsUploading(false);
         }
@@ -160,7 +160,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
                                     Account Management
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none mb-1">Einstellungen</h2>
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none mb-1">Settings</h2>
                             </div>
                             <button onClick={onClose} className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-2xl transition-all">
                                 <X size={20} />
@@ -189,7 +189,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
 
                                         {/* Hover Overlay */}
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                                            <span className="text-white text-xs font-bold">Ändern</span>
+                                            <span className="text-white text-xs font-bold">Change</span>
                                         </div>
 
                                         {/* Loading State */}
@@ -207,7 +207,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                         onChange={handleFileChange}
                                     />
                                 </div>
-                                <h3 className="text-lg font-black text-slate-900 mb-0.5">{name || 'Lade...'}</h3>
+                                <h3 className="text-lg font-black text-slate-900 mb-0.5">{name || 'Loading...'}</h3>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{email || '...'}</p>
                             </div>
 
@@ -215,13 +215,13 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                             <div className="md:col-span-8 flex flex-col h-full">
                                 <div className="mb-6">
                                     <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-2xl text-sm font-bold border-2 border-red-100">
-                                        Abmelden
+                                        Log out
                                     </button>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-5 md:gap-6 mb-4">
                                     <div className="col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Anzeigename</label>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Display Name</label>
                                         <div className="relative group">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                                 <User className="text-slate-400" size={16} />
@@ -235,7 +235,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                         </div>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">E-Mail</label>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label>
                                         <input
                                             type="email"
                                             value={email}
@@ -245,19 +245,32 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                     </div>
                                 </div>
                                 <div className="col-span-2 mt-2 pt-6 border-t border-slate-100">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Dein Abonnement</h4>
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Your Subscription</h4>
                                     <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center justify-between">
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-sm font-bold text-slate-900 capitalize">{storeSubscription} Plan</span>
                                                 {storeSubscription !== 'free' && (
-                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">Aktiv</span>
+                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">Active</span>
                                                 )}
                                             </div>
                                             <p className="text-xs text-slate-500 font-medium">
-                                                {storeSubscription === 'free'
-                                                    ? 'Du nutzt derzeit den kostenlosen Plan.'
-                                                    : 'Danke, dass du Plainly unterstützt!'}
+                                                {storeSubscription === 'free' ? (
+                                                    <div className="mt-3">
+                                                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
+                                                            <span>Monthly Limit</span>
+                                                            <span className="text-orange-500">2 of 3 used</span>
+                                                        </div>
+                                                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-gradient-to-r from-orange-400 to-red-500 w-[66%] rounded-full"></div>
+                                                        </div>
+                                                        <p className="text-[10px] text-slate-400 mt-2 font-medium">
+                                                            Reach the next level for unlimited exports.
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    'Thank you for supporting Plainly!'
+                                                )}
                                             </p>
                                         </div>
 
@@ -281,12 +294,12 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                                         if (data.url) window.location.href = data.url;
                                                     } catch (err) {
                                                         console.error('Portal redirect failed', err);
-                                                        alert('Fehler beim Weiterleiten zum Kundenportal.');
+                                                        alert('Error redirecting to customer portal.');
                                                     }
                                                 }}
                                                 className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 text-xs font-bold rounded-xl transition-all"
                                             >
-                                                Abo verwalten
+                                                Manage Subscription
                                             </button>
                                         )}
                                     </div>
@@ -296,16 +309,16 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Support & Feedback</h4>
                                     <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900 mb-1">Hast du Fragen oder Ideen?</p>
+                                            <p className="text-sm font-bold text-slate-900 mb-1">Questions or ideas?</p>
                                             <p className="text-xs text-slate-500 font-medium max-w-xs">
-                                                Schreib mir direkt auf X (Twitter). Ich freue mich über jedes Feedback!
+                                                DM me directly on X (Twitter). I appreciate every feedback!
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => window.open('https://x.com/Feliixx0', '_blank')}
                                             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-black hover:border-slate-300 text-xs font-bold rounded-xl transition-all"
                                         >
-                                            Kontakt auf X
+                                            Contact on X
                                         </button>
                                     </div>
                                 </div>
@@ -316,7 +329,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClos
                     {/* Footer */}
                     <div className="relative flex-none px-8 md:px-12 py-5 border-t border-slate-100/50 bg-white/50 backdrop-blur-md flex items-center justify-end gap-3 z-10">
                         <button onClick={onClose} className="px-6 py-3 bg-white text-slate-600 rounded-2xl text-xs font-black border border-slate-100">
-                            Schließen
+                            Close
                         </button>
                     </div>
 

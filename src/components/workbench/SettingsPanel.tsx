@@ -3,7 +3,7 @@
 import { useEmailStore } from '@/store/useEmailStore';
 import { scrapeProduct } from '@/app/actions/scrape-product';
 import { useState } from 'react';
-import { Upload, Trash2, Wand2, Sparkles, Loader2, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { Upload, Trash2, Wand2, Sparkles, Loader2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Check } from 'lucide-react';
 
 export const SettingsPanel = () => {
     const { blocks, selectedBlockId, updateBlock, settings, updateSettings, applyTheme } = useEmailStore();
@@ -21,54 +21,45 @@ export const SettingsPanel = () => {
                 </div>
 
                 <div className="p-6 space-y-8">
-                    {/* Paper Background */}
-                    <div className="space-y-3">
-                        <label className="text-sm font-bold text-gray-400 uppercase tracking-wider block ml-1">Paper</label>
-                        <div className="p-5 bg-gray-50/50 rounded-[1.75rem] shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div
-                                    className="w-12 h-12 rounded-2xl shadow-inner border-2 border-white"
-                                    style={{ backgroundColor: settings.backgroundColor }}
-                                />
+                    {/* Global Settings */}
+                    {/* Background Color (Compact) */}
+                    <div className="flex items-center justify-between group">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                            <div className="p-1.5 rounded-md bg-gray-50 text-gray-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors">
+                                <Sparkles size={12} />
+                            </div>
+                            Email Background
+                        </label>
+
+                        <div className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-lg bg-gray-50 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all">
+                            <span className="text-[10px] font-bold text-gray-400">#</span>
+                            <input
+                                type="text"
+                                value={settings.backgroundColor.replace('#', '')}
+                                onChange={(e) => updateSettings({ backgroundColor: `#${e.target.value}` })}
+                                className="w-16 bg-transparent border-none text-xs font-mono font-bold text-gray-700 p-0 focus:ring-0 uppercase"
+                            />
+                            <div className="relative w-6 h-6 rounded-md shadow-sm border border-black/5 overflow-hidden" style={{ backgroundColor: settings.backgroundColor }}>
                                 <input
-                                    type="text"
-                                    value={settings.backgroundColor}
+                                    type="color"
+                                    className="absolute inset-0 opacity-0 cursor-pointer w-[150%] h-[150%] -top-1 -left-1"
+                                    value={settings.backgroundColor || '#ffffff'}
                                     onChange={(e) => updateSettings({ backgroundColor: e.target.value })}
-                                    className="flex-1 bg-white border-0 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
                                 />
                             </div>
-                            <input
-                                type="color"
-                                className="w-full h-12 rounded-xl cursor-pointer border-0 p-0"
-                                value={settings.backgroundColor || '#ffffff'}
-                                onChange={(e) => updateSettings({ backgroundColor: e.target.value })}
-                            />
                         </div>
                     </div>
 
-                    {/* Workbench Background */}
-                    <div className="space-y-3">
-                        <label className="text-sm font-bold text-gray-400 uppercase tracking-wider block ml-1">Workbench</label>
-                        <div className="p-5 bg-gray-50/50 rounded-[1.75rem] shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div
-                                    className="w-12 h-12 rounded-2xl shadow-inner border-2 border-white"
-                                    style={{ backgroundColor: settings.workbenchColor }}
-                                />
-                                <input
-                                    type="text"
-                                    value={settings.workbenchColor}
-                                    onChange={(e) => updateSettings({ workbenchColor: e.target.value })}
-                                    className="flex-1 bg-white border-0 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
-                                />
-                            </div>
-                            <input
-                                type="color"
-                                className="w-full h-12 rounded-xl cursor-pointer border-0 p-0"
-                                value={settings.workbenchColor || '#F4F2EE'}
-                                onChange={(e) => updateSettings({ workbenchColor: e.target.value })}
-                            />
-                        </div>
+                    {/* Pre-Header Input */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1">Pre-Header Text</label>
+                        <input
+                            type="text"
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all shadow-sm placeholder:text-slate-300"
+                            value={settings.preheader || ''}
+                            onChange={(e) => updateSettings({ preheader: e.target.value })}
+                            placeholder="Appears after the subject line..."
+                        />
                     </div>
 
                     {/* Smart Themes */}
@@ -83,22 +74,36 @@ export const SettingsPanel = () => {
                                 { name: 'Elegant', color: '#d4af37', font: 'Georgia' },
                                 { name: 'Bold', color: '#000000', font: 'Oswald' },
                                 { name: 'Playful', color: '#ff4757', font: 'Comic Sans MS' }
-                            ].map((theme) => (
-                                <button
-                                    key={theme.name}
-                                    onClick={() => applyTheme(theme.name)}
-                                    className="group relative overflow-hidden rounded-2xl p-4 text-left border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all active:scale-95 bg-white"
-                                >
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-transparent to-gray-50 rounded-bl-3xl -mr-4 -mt-4 group-hover:to-indigo-50 transition-colors"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-8 h-8 rounded-full mb-3 shadow-sm border border-black/5 flex items-center justify-center" style={{ backgroundColor: theme.color }}>
-                                            <span className="text-[10px] text-white font-bold opacity-50">Aa</span>
+                            ].map((theme) => {
+                                const isActive = settings.activeTheme === theme.name;
+                                return (
+                                    <button
+                                        key={theme.name}
+                                        onClick={() => applyTheme(theme.name)}
+                                        className={`group relative overflow-hidden rounded-2xl p-4 text-left border transition-all active:scale-95 bg-white ${isActive
+                                            ? 'border-indigo-600 ring-2 ring-indigo-600 shadow-xl scale-[1.02]'
+                                            : 'border-gray-100 hover:border-indigo-200 hover:shadow-lg'
+                                            }`}
+                                    >
+                                        <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-transparent to-gray-50 rounded-bl-3xl -mr-4 -mt-4 transition-colors ${isActive ? 'to-indigo-50' : 'group-hover:to-indigo-50'}`}></div>
+
+                                        {/* Active Checkmark */}
+                                        {isActive && (
+                                            <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                                                <Check size={14} className="text-white" strokeWidth={3} />
+                                            </div>
+                                        )}
+
+                                        <div className="relative z-10">
+                                            <div className="w-8 h-8 rounded-full mb-3 shadow-sm border border-black/5 flex items-center justify-center" style={{ backgroundColor: theme.color }}>
+                                                <span className="text-[10px] text-white font-bold opacity-50">Aa</span>
+                                            </div>
+                                            <div className={`text-sm font-bold ${isActive ? 'text-indigo-600' : 'text-gray-900'}`}>{theme.name}</div>
+                                            <div className="text-[10px] text-gray-400 font-medium">{theme.font}</div>
                                         </div>
-                                        <div className="text-sm font-bold text-gray-900">{theme.name}</div>
-                                        <div className="text-[10px] text-gray-400 font-medium">{theme.font}</div>
-                                    </div>
-                                </button>
-                            ))}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -486,6 +491,28 @@ export const SettingsPanel = () => {
                                 placeholder="Image description"
                             />
                         </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Alignment</label>
+                            <div className="flex bg-slate-50 p-1 rounded-[1.2rem] border border-slate-100/50">
+                                {[
+                                    { value: 'left', icon: AlignLeft },
+                                    { value: 'center', icon: AlignCenter },
+                                    { value: 'right', icon: AlignRight }
+                                ].map((align) => (
+                                    <button
+                                        key={align.value}
+                                        onClick={() => handleChange('textAlign', align.value, true)}
+                                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${selectedBlock.styles.textAlign === align.value || (!selectedBlock.styles.textAlign && align.value === 'center')
+                                            ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-black/5'
+                                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                                            }`}
+                                    >
+                                        <align.icon size={16} strokeWidth={2.5} />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -520,6 +547,28 @@ export const SettingsPanel = () => {
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Alignment</label>
+                            <div className="flex bg-slate-50 p-1 rounded-[1.2rem] border border-slate-100/50">
+                                {[
+                                    { value: 'left', icon: AlignLeft },
+                                    { value: 'center', icon: AlignCenter },
+                                    { value: 'right', icon: AlignRight }
+                                ].map((align) => (
+                                    <button
+                                        key={align.value}
+                                        onClick={() => handleChange('textAlign', align.value, true)}
+                                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${selectedBlock.styles.textAlign === align.value || (!selectedBlock.styles.textAlign && align.value === 'center')
+                                            ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-black/5'
+                                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                                            }`}
+                                    >
+                                        <align.icon size={16} strokeWidth={2.5} />
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -658,6 +707,28 @@ export const SettingsPanel = () => {
                         </div>
 
                         <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Alignment</label>
+                            <div className="flex bg-slate-50 p-1 rounded-[1.2rem] border border-slate-100/50">
+                                {[
+                                    { value: 'left', icon: AlignLeft },
+                                    { value: 'center', icon: AlignCenter },
+                                    { value: 'right', icon: AlignRight }
+                                ].map((align) => (
+                                    <button
+                                        key={align.value}
+                                        onClick={() => handleChange('textAlign', align.value, true)}
+                                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${selectedBlock.styles.textAlign === align.value || (!selectedBlock.styles.textAlign && align.value === 'center')
+                                            ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-black/5'
+                                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                                            }`}
+                                    >
+                                        <align.icon size={16} strokeWidth={2.5} />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
                             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-3">Networks</label>
                             {['facebook', 'instagram', 'linkedin', 'x'].map((network) => (
                                 <div key={network} className="mb-3 p-1 bg-white rounded-2xl shadow-sm transition-all hover:shadow-md">
@@ -750,6 +821,28 @@ export const SettingsPanel = () => {
                                 value={selectedBlock.content.separator}
                                 onChange={(e) => handleChange('separator', e.target.value)}
                             />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Alignment</label>
+                            <div className="flex bg-slate-50 p-1 rounded-[1.2rem] border border-slate-100/50">
+                                {[
+                                    { value: 'left', icon: AlignLeft },
+                                    { value: 'center', icon: AlignCenter },
+                                    { value: 'right', icon: AlignRight }
+                                ].map((align) => (
+                                    <button
+                                        key={align.value}
+                                        onClick={() => handleChange('textAlign', align.value, true)} // Apply to styles
+                                        className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${selectedBlock.styles.textAlign === align.value || (!selectedBlock.styles.textAlign && align.value === 'center')
+                                            ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-black/5'
+                                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                                            }`}
+                                    >
+                                        <align.icon size={16} strokeWidth={2.5} />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div>
@@ -1063,6 +1156,28 @@ export const SettingsPanel = () => {
                                 />
                             </div>
 
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Alignment</label>
+                                <div className="flex bg-slate-50 p-1 rounded-[1.2rem] border border-slate-100/50">
+                                    {[
+                                        { value: 'left', icon: AlignLeft },
+                                        { value: 'center', icon: AlignCenter },
+                                        { value: 'right', icon: AlignRight }
+                                    ].map((align) => (
+                                        <button
+                                            key={align.value}
+                                            onClick={() => handleChange('textAlign', align.value, true)} // Apply to styles
+                                            className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${selectedBlock.styles.textAlign === align.value || (!selectedBlock.styles.textAlign && align.value === 'center')
+                                                ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-black/5'
+                                                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'
+                                                }`}
+                                        >
+                                            <align.icon size={16} strokeWidth={2.5} />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="bg-white p-5 rounded-[1.5rem] shadow-sm space-y-4">
                                 <div>
                                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Size</label>
@@ -1101,89 +1216,120 @@ export const SettingsPanel = () => {
                     )
                 }
 
-                {
-                    selectedBlock.type === 'table' && (
-                        <div className="space-y-6">
-                            <div className="bg-white p-5 rounded-[1.5rem] shadow-sm space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedBlock.content.striped || false}
-                                        onChange={(e) => handleChange('striped', e.target.checked)}
-                                        className="rounded border-gray-300 text-[#0A66C2] focus:ring-pink-500"
-                                    />
-                                    <label className="text-sm font-bold text-gray-700">Striped Rows</label>
-                                </div>
+                {selectedBlock.type === 'table' && (
+                    <div className="space-y-6">
+                        <div className="bg-white p-5 rounded-[1.5rem] shadow-sm space-y-4">
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedBlock.content.striped || false}
+                                    onChange={(e) => handleChange('striped', e.target.checked)}
+                                    className="rounded border-gray-300 text-[#0A66C2] focus:ring-pink-500"
+                                />
+                                <label className="text-sm font-bold text-gray-700">Striped Rows</label>
+                            </div>
 
-                                <div>
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Text Color</label>
-                                    <div className="flex gap-3">
-                                        <div
-                                            className="w-12 h-12 rounded-2xl shadow-inner border-2 border-gray-50"
-                                            style={{ backgroundColor: selectedBlock.content.textColor || '#374151' }}
-                                        />
-                                        <input
-                                            type="color"
-                                            className="flex-1 h-12 p-0 border-0 rounded-2xl overflow-hidden cursor-pointer"
-                                            value={selectedBlock.content.textColor || '#374151'}
-                                            onChange={(e) => handleChange('textColor', e.target.value)}
-                                        />
-                                    </div>
-                                </div>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedBlock.content.boldFirstColumn !== false} // Default to true
+                                    onChange={(e) => handleChange('boldFirstColumn', e.target.checked)}
+                                    className="rounded border-gray-300 text-[#0A66C2] focus:ring-pink-500"
+                                />
+                                <label className="text-sm font-bold text-gray-700">Bold First Column</label>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedBlock.content.hasThirdColumn || false}
+                                    onChange={(e) => handleChange('hasThirdColumn', e.target.checked)}
+                                    className="rounded border-gray-300 text-[#0A66C2] focus:ring-pink-500"
+                                />
+                                <label className="text-sm font-bold text-gray-700">Add 3rd Column (Info)</label>
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-3">Row Items</label>
-                                <div className="space-y-3">
-                                    {selectedBlock.content.rows?.map((row: any, i: number) => (
-                                        <div key={i} className="bg-white p-4 rounded-[1.5rem] shadow-sm space-y-2">
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    value={row.label}
-                                                    onChange={(e) => {
-                                                        const newRows = [...selectedBlock.content.rows];
-                                                        newRows[i].label = e.target.value;
-                                                        handleChange('rows', newRows);
-                                                    }}
-                                                    className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
-                                                    placeholder="Label"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    value={row.value}
-                                                    onChange={(e) => {
-                                                        const newRows = [...selectedBlock.content.rows];
-                                                        newRows[i].value = e.target.value;
-                                                        handleChange('rows', newRows);
-                                                    }}
-                                                    className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
-                                                    placeholder="Value"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    const newRows = selectedBlock.content.rows.filter((_: any, idx: number) => idx !== i);
-                                                    handleChange('rows', newRows);
-                                                }}
-                                                className="text-xs font-bold text-red-400 hover:text-red-600 transition-colors"
-                                            >Remove Row</button>
-                                        </div>
-                                    ))}
-                                    <button
-                                        onClick={() => {
-                                            const newRows = [...(selectedBlock.content.rows || []), { label: 'Item', value: 'Value' }];
-                                            handleChange('rows', newRows);
-                                        }}
-                                        className="w-full py-3 text-xs font-bold border-2 border-dashed border-[#0A66C2] border-opacity-200 text-[#0A66C2] rounded-2xl hover:border-[#0A66C2] border-opacity-400 hover:bg-[#E7F3FF] transition-all"
-                                    >
-                                        + Add Row
-                                    </button>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-2">Text Color</label>
+                                <div className="flex gap-3">
+                                    <div
+                                        className="w-12 h-12 rounded-2xl shadow-inner border-2 border-gray-50"
+                                        style={{ backgroundColor: selectedBlock.content.textColor || '#374151' }}
+                                    />
+                                    <input
+                                        type="color"
+                                        className="flex-1 h-12 p-0 border-0 rounded-2xl overflow-hidden cursor-pointer"
+                                        value={selectedBlock.content.textColor || '#374151'}
+                                        onChange={(e) => handleChange('textColor', e.target.value)}
+                                    />
                                 </div>
                             </div>
                         </div>
-                    )
-                }
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block ml-1 mb-3">Row Items</label>
+                            <div className="space-y-3">
+                                {selectedBlock.content.rows?.map((row: any, i: number) => (
+                                    <div key={i} className="bg-white p-4 rounded-[1.5rem] shadow-sm space-y-2">
+                                        <div className="space-y-2">
+                                            <input
+                                                type="text"
+                                                value={row.label}
+                                                onChange={(e) => {
+                                                    const newRows = [...selectedBlock.content.rows];
+                                                    newRows[i].label = e.target.value;
+                                                    handleChange('rows', newRows);
+                                                }}
+                                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
+                                                placeholder="Label (Col 1)"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={row.value}
+                                                onChange={(e) => {
+                                                    const newRows = [...selectedBlock.content.rows];
+                                                    newRows[i].value = e.target.value;
+                                                    handleChange('rows', newRows);
+                                                }}
+                                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
+                                                placeholder="Value (Col 2)"
+                                            />
+                                            {selectedBlock.content.hasThirdColumn && (
+                                                <input
+                                                    type="text"
+                                                    value={row.col3 || ''}
+                                                    onChange={(e) => {
+                                                        const newRows = [...selectedBlock.content.rows];
+                                                        newRows[i].col3 = e.target.value;
+                                                        handleChange('rows', newRows);
+                                                    }}
+                                                    className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#E7F3FF] outline-none transition-all"
+                                                    placeholder="Info (Col 3)"
+                                                />
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const newRows = selectedBlock.content.rows.filter((_: any, idx: number) => idx !== i);
+                                                handleChange('rows', newRows);
+                                            }}
+                                            className="text-xs font-bold text-red-400 hover:text-red-600 transition-colors"
+                                        >Remove Row</button>
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => {
+                                        const newRows = [...(selectedBlock.content.rows || []), { label: 'Item', value: 'Value', col3: 'Info' }];
+                                        handleChange('rows', newRows);
+                                    }}
+                                    className="w-full py-3 text-xs font-bold border-2 border-dashed border-[#0A66C2] border-opacity-200 text-[#0A66C2] rounded-2xl hover:border-[#0A66C2] border-opacity-400 hover:bg-[#E7F3FF] transition-all"
+                                >
+                                    + Add Row
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {
                     selectedBlock.type === 'image-text' && (
