@@ -208,11 +208,7 @@ export const Toolbox = () => {
                     })}
                 </div>
 
-                <div className="mt-auto pt-4 flex flex-col gap-4 items-center">
-                    <button className="text-slate-400 hover:text-slate-900 transition-colors pb-2">
-                        <Settings size={24} />
-                    </button>
-                </div>
+
             </div>
 
             {/* --- SLIDE-OUT ASSET LIBRARY --- */}
