@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, Lock, Check, Loader2, ArrowRight, User } from 'lucide-react';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
@@ -76,9 +77,13 @@ export default function RegisterPage() {
 
                 <div className="relative z-10">
                     <Link href="/" className="flex items-center gap-3 w-fit">
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 font-black shadow-lg">
-                            P
-                        </div>
+                        <Image
+                            src="/logo.png"
+                            alt="Plainly"
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 rounded-xl shadow-lg"
+                        />
                         <span className="font-bold text-2xl tracking-tight">Plainly</span>
                     </Link>
                 </div>

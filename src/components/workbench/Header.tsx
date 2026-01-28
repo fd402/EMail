@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Eye, Code, Copy, Smartphone, LayoutTemplate, ChevronDown, Settings, LogOut, User, Undo2, Redo2, Sparkles, Moon, Sun, MessageSquare, Share2, Download, Loader2, Plus } from 'lucide-react';
 import { ProfileSettings } from './ProfileSettings';
 import { useEmailStore } from '@/store/useEmailStore';
@@ -171,9 +172,13 @@ export const Header = ({ viewMode, setViewMode, onOpenTemplates, isDarkMode, set
             {/* Left: Brand */}
             <div className="flex items-center gap-8">
                 <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-200">
-                        P
-                    </div>
+                    <Image
+                        src="/logo.png"
+                        alt="Plainly"
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-xl shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-200"
+                    />
                     <span className="font-black text-slate-900 text-lg leading-none tracking-tight">Plainly</span>
                 </Link>
 

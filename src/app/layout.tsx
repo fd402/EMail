@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Plainly | Free HTML Email Builder",
   description: "Create beautiful, responsive HTML emails in seconds. No coding required. drag & drop editor, professional templates, and instant export.",
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 import { AuthProvider } from "@/components/AuthProvider";

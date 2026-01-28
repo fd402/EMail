@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Mail, Shield, Scale, Info, Globe } from 'lucide-react';
+import Image from 'next/image';
 
 export const LandingFooter = () => {
     const [openTab, setOpenTab] = useState<'privacy' | 'terms' | 'contact' | 'about' | null>(null);
@@ -90,9 +91,13 @@ export const LandingFooter = () => {
                     {/* Column 1: Brand */}
                     <div className="md:col-span-6">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-indigo-100 shadow-xl">
-                                <div className="w-2.5 h-2.5 bg-white rounded-full" />
-                            </div>
+                            <Image
+                                src="/logo.png"
+                                alt="Plainly"
+                                width={40}
+                                height={40}
+                                className="w-10 h-10 rounded-xl shadow-indigo-100 shadow-xl"
+                            />
                             <span className="font-black text-2xl text-slate-900 tracking-tight">Plainly</span>
                         </div>
                         <p className="text-slate-500 text-lg leading-relaxed max-w-sm font-medium">

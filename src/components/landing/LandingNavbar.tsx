@@ -1,13 +1,18 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const LandingNavbar = () => {
     return (
         <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform">
-                        P
-                    </div>
+                    <Image
+                        src="/logo.png"
+                        alt="Plainly"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-lg shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform"
+                    />
                     <span className="font-black text-slate-800 text-lg tracking-tight">Plainly</span>
                 </Link>
                 <div className="flex items-center gap-6">
