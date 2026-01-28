@@ -5,7 +5,6 @@ import { LandingFAQ } from '@/components/landing/LandingFAQ';
 import { LandingNavbar } from '@/components/landing/LandingNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingIntegrations } from '@/components/landing/LandingIntegrations';
-import { LandingTestimonials } from '@/components/landing/LandingTestimonials';
 import { LandingPlayground } from '@/components/landing/LandingPlayground';
 
 export default function LandingPage() {
@@ -93,9 +92,6 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
-
-            {/* Testimonials */}
-            <LandingTestimonials />
 
             {/* Pricing Section */}
             <div id="pricing">

@@ -6,7 +6,7 @@ import {
     Menu as MenuIcon, Timer, QrCode, Table2,
     LayoutTemplate, Minus, Search, Camera,
     Loader2, Star, Music, Terminal, Calendar,
-    AlertTriangle, ListChecks, Plus, Settings, Wand2, X,
+    AlertTriangle, ListChecks, Plus, Wand2, X,
     Image as ImageIcon
 } from 'lucide-react';
 import { PricingModal } from '../subscription/PricingModal';
@@ -25,24 +25,24 @@ interface UnsplashImage {
 
 // --- Tools Data ---
 const TOOLS = [
-    { id: 'text', label: 'Text', icon: Type, description: 'Füge formatierten Text zu deiner E-Mail hinzu', category: 'basis' },
-    { id: 'image', label: 'Image', icon: ImageIcon, description: 'Füge Bilder von einer URL ein', category: 'basis' },
-    { id: 'button', label: 'Button', icon: Square, description: 'Erstelle anklickbare Call-to-Action Buttons', category: 'basis' },
-    { id: 'row', label: 'Columns', icon: Columns, description: 'Erstelle mehrspaltige Layouts', category: 'layout' },
-    { id: 'divider', label: 'Divider', icon: Minus, description: 'Trenne Elemente mit einer horizontalen Linie', category: 'layout' },
-    { id: 'social', label: 'Social', icon: Share2, description: 'Füge Social Media Icons hinzu', category: 'media' },
-    { id: 'audio', label: 'Audio', icon: Music, description: 'Füge Audio-Player für Podcasts ein', category: 'media' },
-    { id: 'image-text', label: 'Media + Text', icon: LayoutTemplate, description: 'Kombiniere Bilder mit Text', category: 'media' },
-    { id: 'html', label: 'HTML', icon: Code, description: 'Füge eigenen HTML-Code ein', category: 'advanced' },
-    { id: 'code', label: 'Code Snippet', icon: Terminal, description: 'Zeige Code-Schnipsel mit Syntax-Highlighting', category: 'advanced' },
-    { id: 'menu', label: 'Nav Menu', icon: MenuIcon, description: 'Erstelle ein Navigationsmenü', category: 'advanced' },
-    { id: 'table', label: 'Grid Table', icon: Table2, description: 'Füge strukturierte Tabellen ein', category: 'advanced' },
-    { id: 'nps', label: 'Survey (NPS)', icon: Star, description: 'Erstelle Net Promoter Score Umfragen', category: 'growth' },
-    { id: 'countdown', label: 'Countdown', icon: Timer, description: 'Füge einen Countdown-Timer hinzu', category: 'growth' },
-    { id: 'qr', label: 'QR Code', icon: QrCode, description: 'Generiere QR-Codes', category: 'growth' },
-    { id: 'event', label: 'Event Card', icon: Calendar, description: 'Zeige Event-Details mit Datum an', category: 'growth' },
-    { id: 'alert', label: 'Alert Box', icon: AlertTriangle, description: 'Erstelle Info-, Warn- oder Erfolgs-Hinweise', category: 'growth' },
-    { id: 'pros-cons', label: 'Pros & Cons', icon: ListChecks, description: 'Erstelle Vor- und Nachteile Listen', category: 'growth' },
+    { id: 'text', label: 'Text', icon: Type, description: 'Add formatted text to your email', category: 'basis' },
+    { id: 'image', label: 'Image', icon: ImageIcon, description: 'Insert images from a URL', category: 'basis' },
+    { id: 'button', label: 'Button', icon: Square, description: 'Create clickable CTA buttons', category: 'basis' },
+    { id: 'row', label: 'Columns', icon: Columns, description: 'Create multi-column layouts', category: 'layout' },
+    { id: 'divider', label: 'Divider', icon: Minus, description: 'Separate elements with a horizontal line', category: 'layout' },
+    { id: 'social', label: 'Social', icon: Share2, description: 'Add social media icons', category: 'media' },
+    { id: 'audio', label: 'Audio', icon: Music, description: 'Embed audio players for podcasts', category: 'media' },
+    { id: 'image-text', label: 'Media + Text', icon: LayoutTemplate, description: 'Combine images with text', category: 'media' },
+    { id: 'html', label: 'HTML', icon: Code, description: 'Insert custom HTML code', category: 'advanced' },
+    { id: 'code', label: 'Code Snippet', icon: Terminal, description: 'Display code snippets with syntax highlighting', category: 'advanced' },
+    { id: 'menu', label: 'Nav Menu', icon: MenuIcon, description: 'Create a navigation menu', category: 'advanced' },
+    { id: 'table', label: 'Grid Table', icon: Table2, description: 'Insert structured tables', category: 'advanced' },
+    { id: 'nps', label: 'Survey (NPS)', icon: Star, description: 'Create Net Promoter Score surveys', category: 'growth' },
+    { id: 'countdown', label: 'Countdown', icon: Timer, description: 'Add a countdown timer', category: 'growth' },
+    { id: 'qr', label: 'QR Code', icon: QrCode, description: 'Generate QR codes', category: 'growth' },
+    { id: 'event', label: 'Event Card', icon: Calendar, description: 'Display event details', category: 'growth' },
+    { id: 'alert', label: 'Alert Box', icon: AlertTriangle, description: 'Create info, warning, or success alerts', category: 'growth' },
+    { id: 'pros-cons', label: 'Pros & Cons', icon: ListChecks, description: 'Create pros & cons lists', category: 'growth' },
 ];
 
 const CATEGORIES = [
