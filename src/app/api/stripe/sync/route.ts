@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
                     stripe_subscription_id: sub.id,
                     subscription_status: sub.status,
                     subscription_plan: plan,
-                    subscription_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+                    subscription_period_end: new Date((sub as any).current_period_end * 1000).toISOString(),
                 }).eq('id', user.id);
 
                 return NextResponse.json({ success: true, plan, status: sub.status });
